@@ -1,6 +1,7 @@
 Package: disag
 Type: Package
-Title: Base classes and simple models for disaggregation regression models
+Title: Base classes and simple models for disaggregation regression models. 
+    Potential name agouti (aggregate outputs ish or aggregat outputs I think)
 Version: 0.0.1
 Date: 2021-08-28
 Author: Tim Lucas
@@ -9,11 +10,13 @@ Description: Disaggregation regression, or learning from aggregate outputs, has 
 	different aspects, such as spatial models. This package attempts to create a widely applicable base giving classes and simple models that
 	adequately capture the broad differences (mostly in terms of data structure, and link functions) while leaving the specific models for add
 	on packages.
-Suggests:
 Imports:
     grDevices,
     stats,
     graphics
 License: MIT + file LICENSE
 URL: https://github.com/timcdlucas/disag
-RoxygenNote: 5.0.1
+LazyData: true
+RoxygenNote: 7.1.1
+Depends: 
+    R (>= 2.10)
