@@ -1,0 +1,242 @@
+---
+title: "data_visualisation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{data_visualisation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(disag)
+library(dplyr)
+library(forcats)
+library(gganimate)
+library(plotly)
+data(madagascar_malaria)
+```
+
+
+
+Data visualisation is a difficult problem with aggregated outputs. 
+Even standard plots like scatter plots do not work because there are many covariate
+values for each response value.
+Simple plots, like using the aggregate output value for all covariate values 
+don't make much sense.
+There are two particular problems that should be addressed.
+Firstly, the methods should scale to hundreds or thousands of aggregate output datapoints.
+Secondly, the methods should be vaguely capable of detecting the importance of nonlinearity. 
+By this I mean, if it is the very large values of a covariate that drive the output,
+this should be at least in principle visable in the plots.
+This exludes using the group mean of the covariates, or removing "outliers".
+Ideally, the methods should also be able to accept weights.
+
+
+```{r naive}
+ggplot(madagascar_malaria, aes(LSTmean, case_rate, colour = as.numeric(ID))) + 
+  geom_point()
+
+```
+
+
+Here are some basic ideas that I don't think work very well.
+
+```{r linked_plots}
+
+
+
+madagascar_malaria %>% 
+  ggplot(aes(y = case_rate, x = LSTmean, colour = as.numeric(ID), group = factor(ID))) +
+    geom_point(alpha = 0.5) +
+    geom_path()
+
+madagascar_malaria %>% 
+  ggplot(aes(y = LSTmean, x = fct_reorder(factor(ID), case_rate), colour = case_rate, group = ID)) +
+    geom_violin() +
+    #geom_point(alpha = 0.5) +
+    coord_flip()+
+    ylab('Pixel LSTmean') +
+    labs(colour = 'Disease Rate') +
+    xlab('Site id (ordered by disease rate)') +
+    theme(text = element_text(size = 20),
+          axis.text.y = element_blank())
+```
+
+
+
+
+
+
+
+
+Another way we could consider plotting these is to summarise each aggregate output
+as a weighted proportion of covariates that are over a particular value. And then
+plot this against the aggregate output. However, we would want to sweep over various 
+values of the threshold value. Therefore, small multiples, 3D plots and annimated
+plots are all potentially useful.
+
+
+
+First we will do a single plot.
+
+```{r single_thresh}
+
+madagascar_malaria %>% 
+  group_by(ID) %>% 
+  summarise(prop = weighted.mean(LSTmean > 0, w = pop),
+            case_rate = mean(case_rate)) %>% 
+  ggplot(aes(x = prop, y = case_rate)) + 
+    geom_point()
+
+```
+
+
+
+Now try small multiples.
+
+
+
+```{r small_multiples_thresh}
+
+thresholds_sm <- quantile(madagascar_malaria$LSTmean, seq(0.1, 0.9, length.out = 25))
+
+madagascar_malaria %>% 
+  group_by(ID) %>% 
+  summarise(prop = sapply(thresholds_sm, 
+                          \(x) weighted.mean(LSTmean > x, w = pop)),
+            threshold = round(thresholds_sm, 3),
+            case_rate = mean(case_rate)) %>% 
+  ggplot(aes(x = prop, y = case_rate)) + 
+    geom_point() +
+    facet_wrap(~ threshold)
+
+```
+
+
+Lets add some bells and whistels
+
+```{r small_multiples_thresh2}
+
+thresholds_sm <- quantile(madagascar_malaria$LSTmean, seq(0.1, 0.9, length.out = 25))
+
+madagascar_malaria %>% 
+  group_by(ID) %>% 
+  summarise(prop = sapply(thresholds_sm, 
+                          \(x) weighted.mean(LSTmean > x, w = pop)),
+            threshold = round(thresholds_sm, 3),
+            case_rate = mean(case_rate)) %>% 
+  ggplot(aes(x = prop, y = case_rate, colour = threshold)) + 
+    geom_point() +
+    geom_smooth(method = 'lm', colour = 'black') +
+    facet_wrap(~ threshold)
+
+```
+
+
+
+
+And lets try 16 classes instead of 25.
+
+```{r small_multiples_16thresh}
+
+thresholds_sm <- quantile(madagascar_malaria$LSTmean, seq(0.1, 0.9, length.out = 16))
+
+madagascar_malaria %>% 
+  group_by(ID) %>% 
+  summarise(prop = sapply(thresholds_sm, 
+                          \(x) weighted.mean(LSTmean > x, w = pop)),
+            threshold = round(thresholds_sm, 3),
+            case_rate = mean(case_rate)) %>% 
+  ggplot(aes(x = prop, y = case_rate, colour = threshold)) + 
+    geom_point() +
+    geom_smooth(method = 'lm', colour = 'black') +
+    facet_wrap(~ threshold)
+
+```
+
+
+
+
+Finally lets try a different covariate.
+
+```{r small_multiples_thresh_evi}
+
+thresholds_sm <- quantile(madagascar_malaria$EVI, seq(0.1, 0.9, length.out = 16))
+
+madagascar_malaria %>% 
+  group_by(ID) %>% 
+  summarise(prop = sapply(thresholds_sm, 
+                          \(x) weighted.mean(EVI > x, w = pop)),
+            threshold = round(thresholds_sm, 3),
+            case_rate = mean(case_rate)) %>% 
+  ggplot(aes(x = prop, y = case_rate, colour = threshold)) + 
+    geom_point() +
+    geom_smooth(method = 'lm', colour = 'black') +
+    facet_wrap(~ threshold)
+
+```
+
+
+
+
+Now let's animate it.
+
+```{r animate_thresh}
+
+thresholds_sm <- quantile(madagascar_malaria$LSTmean, seq(0.1, 0.9, length.out = 25))
+
+anim <- 
+madagascar_malaria %>% 
+  group_by(ID) %>% 
+  summarise(prop = sapply(thresholds_sm, 
+                          \(x) weighted.mean(LSTmean > x, w = pop)),
+            threshold = round(thresholds_sm, 3),
+            case_rate = mean(case_rate)) %>% 
+  ggplot(aes(x = prop, y = case_rate, colour = threshold)) + 
+    geom_point() +
+    geom_smooth(method = 'lm', colour = 'black') +
+    transition_states(threshold)
+
+animate(anim, renderer = gifski_renderer())
+
+```
+
+
+
+
+Now let's animate it.
+
+```{r animate_thresh}
+
+thresholds_sm <- quantile(madagascar_malaria$LSTmean, seq(0.1, 0.9, length.out = 25))
+
+
+threshold_df <- 
+  madagascar_malaria %>% 
+    group_by(ID) %>% 
+    summarise(prop = sapply(thresholds_sm, 
+                            \(x) weighted.mean(LSTmean > x, w = pop)),
+              threshold = round(thresholds_sm, 3),
+              case_rate = mean(case_rate)) %>% 
+    mutate(ID = as.numeric(ID))
+
+
+fig <- plot_ly(threshold_df, x = ~prop, y = ~threshold, z = ~case_rate,
+              color = ~ID, colorscale='Viridis')
+#fig <- fig %>% add_markers()
+fig <- fig %>% layout(scene = list(xaxis = list(title = 'Proportion'),
+                     yaxis = list(title = 'Threshold value'),
+                     zaxis = list(title = 'Case Rate')))
+
+fig
+
+htmlwidgets::saveWidget(fig, file = '../../disag_outputs/lst_3d.html')
+```
+
