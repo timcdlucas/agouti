@@ -1,2 +1,4 @@
 .Rhistory
 data/
+*.tif
+data-raw/shapes/
