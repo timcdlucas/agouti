@@ -13,10 +13,15 @@ Description: Disaggregation regression, or learning from aggregate outputs, has 
 Imports:
     grDevices,
     stats,
-    graphics
+    graphics,
+    ggplot2
 License: MIT + file LICENSE
 URL: https://github.com/timcdlucas/disag
 LazyData: true
 RoxygenNote: 7.1.1
 Depends: 
     R (>= 2.10)
+Suggests: 
+    rmarkdown,
+    knitr
+VignetteBuilder: knitr

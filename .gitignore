@@ -2,3 +2,5 @@
 data/
 *.tif
 data-raw/shapes/
+inst/doc
+*.png
