@@ -114,6 +114,7 @@ thresh_models_summary %>%
         geom_line()
 
 
-usethis::use_data(prices4, overwrite = TRUE)
+stock_data <- prices4
+usethis::use_data(stock_data, overwrite = TRUE)
 
 

@@ -47,7 +47,7 @@ madagascar_malaria <-
                case_rate = response_rate,
                pop = N,
                agg_pop = N_agg) %>% 
-        select(ID, cellid, cases, case_rate, pop, agg_pop, Elevation, EVI, LSTmean)
+        dplyr::select(ID, cellid, cases, case_rate, pop, agg_pop, Elevation, EVI, LSTmean, longitude, latitude)
 
 usethis::use_data(madagascar_malaria)
 # usethis::use_data(madagascar_malaria, overwrite = TRUE)
