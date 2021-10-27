@@ -3,6 +3,11 @@
 agouti
 ======
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/timcdlucas/agouti/workflows/R-CMD-check/badge.svg)](https://github.com/timcdlucas/agouti/actions)
+<!-- badges: end -->
+
+
 AGgregate OUtcomes Ish. 
 
 Aggregate outcomes are response data that are aggregated over various spaces. 
