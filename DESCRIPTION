@@ -14,7 +14,9 @@ Imports:
     grDevices,
     stats,
     graphics,
-    ggplot2
+    ggplot2,
+    forcats,
+    dplyr
 License: MIT + file LICENSE
 URL: https://github.com/timcdlucas/disag
 LazyData: true

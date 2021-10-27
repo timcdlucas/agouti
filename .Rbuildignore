@@ -3,3 +3,4 @@ figure/*
 README.md
 README.Rmd
 NEWS.md
+^\.github$
