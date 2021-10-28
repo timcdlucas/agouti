@@ -15,3 +15,9 @@ a line and colour coded to match.
 This is a scatter plot which data from the aggregate unit "linked" by 
 a line and colour coded to match.
 }
+\examples{
+data(madagascar_malaria)
+link_plot(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)
+data(madagascar_malaria)
+link_plot(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)
+}

@@ -21,3 +21,7 @@ observations that are above a threshold. A scatter plot with a linear model
 is plotted of the relationship between this proportion and the aggregated output.
 The threshold is varied and small multiples of the different values are plotted.
 }
+\examples{
+data(madagascar_malaria)
+thresh_sm(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)
+}

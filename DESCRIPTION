@@ -1,4 +1,4 @@
-Package: disag
+Package: agouti
 Type: Package
 Title: Base classes and simple models for disaggregation regression models. 
     Potential name agouti (aggregate outputs ish or aggregat outputs I think)
@@ -18,8 +18,9 @@ Imports:
     forcats,
     dplyr
 License: MIT + file LICENSE
-URL: https://github.com/timcdlucas/disag
+URL: https://github.com/timcdlucas/agouti
 LazyData: true
+Encoding: UTF-8
 RoxygenNote: 7.1.1
 Depends: 
     R (>= 2.10)

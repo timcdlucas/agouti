@@ -9,3 +9,7 @@ agouti_summary(x, ID = ID)
 \description{
 Summarise a aggregated output dataset.
 }
+\examples{
+data(madagascar_malaria)
+agouti_summary(madagascar_malaria)
+}

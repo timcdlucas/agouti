@@ -13,3 +13,9 @@ A grouped histogram plot.
 
 A grouped histogram plot.
 }
+\examples{
+data(madagascar_malaria)
+heat_hist(madagascar_malaria$EVI, madagascar_malaria$ID)
+data(madagascar_malaria)
+heat_hist(madagascar_malaria$EVI, madagascar_malaria$ID)
+}

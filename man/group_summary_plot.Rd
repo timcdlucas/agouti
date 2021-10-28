@@ -11,3 +11,8 @@ group_summary_plot(formula, data, ID = ID, weights = weights)
 A function that summarises the groups within an aggregate output dataset, 
 by taking quantiles, and then plots these quantiles against the response data.
 }
+\examples{
+
+data(madagascar_malaria)
+group_summary_plot(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)
+}

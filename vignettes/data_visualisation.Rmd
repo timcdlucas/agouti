@@ -476,7 +476,7 @@ htmlwidgets::saveWidget(fig, file = '../../disag_outputs/lst_3d.html')
 
 Something about quantiles instead
 
-```{r small_multiples_thresh2}
+```{r small_multiples_thresh3}
 
 N <- 25
 diff <- 5
