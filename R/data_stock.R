@@ -27,7 +27,6 @@
 #' \item{symbol}{The stock ticker.}
 #' \item{date}{The date of response data.}
 #' }
-#' @export
 #' @examples
 #' data(stock_data)
 "stock_data"

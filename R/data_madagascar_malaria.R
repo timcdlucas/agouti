@@ -12,7 +12,6 @@
 #' \item{ID}{An ID column for the areal data with}
 #' \item{Temp, NVDI}{Temperature and vegeation index covariates}
 #' }
-#' @export
 #' @examples
 #' madagascar_malaria
 "madagascar_malaria"
