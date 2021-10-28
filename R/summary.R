@@ -4,7 +4,7 @@
 #' 
 #' 
 #' @export
-#' @example
+#' @examples
 #' data(madagascar_malaria)
 #' agouti_summary(madagascar_malaria)
 

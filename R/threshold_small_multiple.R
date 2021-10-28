@@ -9,7 +9,7 @@
 #' 
 #' 
 #' @export
-#' @example
+#' @examples
 #' data(madagascar_malaria)
 #' thresh_sm(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)
 

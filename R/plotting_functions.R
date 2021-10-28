@@ -34,7 +34,7 @@ link_plot <- function(formula, data, ID = ID, weights = weights){
 #' 
 #' 
 #' @export
-#' @example
+#' @examples
 #' data(madagascar_malaria)
 #' heat_hist(madagascar_malaria$EVI, madagascar_malaria$ID)
 

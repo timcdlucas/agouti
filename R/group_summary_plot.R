@@ -3,7 +3,7 @@
 #' by taking quantiles, and then plots these quantiles against the response data.
 #' 
 #' @export
-#' @example
+#' @examples
 #' 
 #' data(madagascar_malaria)
 #' group_summary_plot(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)

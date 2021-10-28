@@ -26,3 +26,6 @@ occured 2 miliseconds or 4 miliseconds before the health data cutoff time.
 NA
 }
 
+\examples{
+disag_data <- disag_from_temporal_dataframe()
+}
