@@ -75,7 +75,7 @@ ggplot(prices4, aes(lagged_growth, growth, colour = as.numeric(ID))) +
 
 
 
-thresholds_sm <- quantile(prices4$lagged_growth, seq(0.02, 0.98, length.out = 25))
+thresholds_sm <- quantile(prices4$lagged_growth, seq(0.05, 0.95, length.out = 25))
 
 prices4 %>% 
     group_by(ID) %>% 
@@ -84,9 +84,10 @@ prices4 %>%
               threshold = round(thresholds_sm, 3),
               growth = mean(growth)) %>% 
     ggplot(aes(x = prop, y = growth)) + 
-        geom_point(alpha = 0.4) +
+        geom_point(alpha = 0.2, shape = 20) +
         geom_smooth(method = 'lm', colour = 'red') +
-        facet_wrap(~ threshold, scale = 'free')
+        facet_wrap(~ threshold, scale = 'free') + 
+        ylim(-0.05, 0.05)
 
 
 

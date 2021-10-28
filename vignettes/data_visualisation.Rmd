@@ -20,8 +20,21 @@ library(dplyr)
 library(forcats)
 library(gganimate)
 library(plotly)
+library(broom)
+library(tidyr)
+library(patchwork)
 data(madagascar_malaria)
+
+
+
+
 ```
+
+
+
+
+
+
 
 
 
@@ -39,8 +52,105 @@ This exludes using the group mean of the covariates, or removing "outliers".
 Ideally, the methods should also be able to accept weights.
 
 
+```{r madagascar_maps}
+
+p1 <- 
+  ggplot(madagascar_malaria, aes(longitude, latitude, fill = LSTmean)) + 
+  geom_raster() + 
+  coord_equal() +
+  theme_minimal() +
+  scale_fill_viridis_c() +
+  ggtitle('Temperature')
+
+
+p2 <- 
+ggplot(madagascar_malaria, aes(longitude, latitude, fill = case_rate)) + 
+  geom_raster() + 
+  coord_equal() +
+  theme_minimal() +
+  ggtitle('Case Rate')
+
+
+p1 + p2
+
+
+```
+
+
+
 ```{r naive}
 ggplot(madagascar_malaria, aes(LSTmean, case_rate, colour = as.numeric(ID))) + 
+  geom_point() +
+  scale_colour_viridis_c()
+
+```
+
+
+```{r naive_weights}
+ggplot(madagascar_malaria, aes(LSTmean, case_rate, colour = as.numeric(ID), alpha = pop)) + 
+  geom_point() +
+  scale_colour_viridis_c()
+
+```
+
+
+While subsetting the data is definitely not ideal, we can perhaps pick out some 
+interesting groups.
+
+```{r naive_weights}
+
+maxx <-
+  madagascar_malaria %>% 
+    arrange(desc(LSTmean)) %>% 
+    head(10) %>% 
+    pull(ID)
+
+minx <- 
+  madagascar_malaria %>% 
+    arrange(LSTmean) %>% 
+    head(10) %>% 
+    pull(ID)
+
+
+
+maxy <- 
+  madagascar_malaria %>% 
+    arrange(desc(case_rate)) %>% 
+    head(10) %>% 
+    pull(ID)
+
+
+miny <- 
+  madagascar_malaria %>% 
+    arrange(case_rate) %>% 
+    head(10) %>% 
+    pull(ID)
+
+
+rand <-
+  madagascar_malaria %>% 
+    filter(!(ID %in% c(maxx, minx, maxy, miny))) %>% 
+    distinct(ID) %>% 
+    sample_n(10) %>% 
+    pull(ID)
+
+madagascar_malaria %>% 
+  filter(ID %in% c(minx, maxx, miny, maxy, rand)) %>% 
+  ggplot(aes(LSTmean, case_rate, colour = as.numeric(ID), 
+             alpha = log10(pop), group = factor(ID))) + 
+    geom_point() +
+    scale_colour_viridis_c() +
+    geom_path()
+
+```
+
+
+
+
+
+
+```{r naive_weights}
+ggplot(madagascar_malaria, aes(LSTmean, case_rate, colour = as.numeric(ID), alpha = pop)) + 
   geom_point()
 
 ```
@@ -53,9 +163,12 @@ Here are some basic ideas that I don't think work very well.
 
 
 madagascar_malaria %>% 
-  ggplot(aes(y = case_rate, x = LSTmean, colour = as.numeric(ID), group = factor(ID))) +
-    geom_point(alpha = 0.5) +
-    geom_path()
+  ggplot(aes(y = case_rate, x = LSTmean, colour = as.numeric(ID), 
+             group = factor(ID))) +
+    geom_point() +
+    geom_path() + 
+    scale_colour_viridis_c()
+
 
 madagascar_malaria %>% 
   ggplot(aes(y = LSTmean, x = fct_reorder(factor(ID), case_rate), colour = case_rate, group = ID)) +
@@ -93,7 +206,8 @@ madagascar_malaria %>%
   summarise(prop = weighted.mean(LSTmean > 0, w = pop),
             case_rate = mean(case_rate)) %>% 
   ggplot(aes(x = prop, y = case_rate)) + 
-    geom_point()
+    geom_point() +
+    xlab("Prop LSTmean > 0")
 
 ```
 
@@ -190,13 +304,39 @@ Now let's animate it.
 
 ```{r animate_thresh}
 
-thresholds_sm <- quantile(madagascar_malaria$LSTmean, seq(0.1, 0.9, length.out = 25))
+thresholds_sm <- quantile(madagascar_malaria$LSTmean, seq(0.9, 0.1, length.out = 100))
 
 anim <- 
 madagascar_malaria %>% 
   group_by(ID) %>% 
   summarise(prop = sapply(thresholds_sm, 
                           \(x) weighted.mean(LSTmean > x, w = pop)),
+            threshold = round(thresholds_sm, 3),
+            case_rate = mean(case_rate)) %>% 
+  ggplot(aes(x = prop, y = case_rate, colour = threshold)) + 
+    geom_point() +
+    geom_smooth(method = 'lm', colour = 'black') +
+    transition_states(threshold) + 
+    labs(title = 'threshold: {closest_state}')
+
+
+gganimate::animate(anim, renderer = gifski_renderer())
+
+```
+
+
+
+Now let's animate it.
+
+```{r animate_thresh2}
+
+thresholds_sm <- quantile(madagascar_malaria$EVI, seq(1, 0.0, length.out = 50))
+
+anim <- 
+madagascar_malaria %>% 
+  group_by(ID) %>% 
+  summarise(prop = sapply(thresholds_sm, 
+                          \(x) weighted.mean(EVI > x, w = pop)),
             threshold = round(thresholds_sm, 3),
             case_rate = mean(case_rate)) %>% 
   ggplot(aes(x = prop, y = case_rate, colour = threshold)) + 
@@ -211,9 +351,99 @@ animate(anim, renderer = gifski_renderer())
 
 
 
-Now let's animate it.
 
-```{r animate_thresh}
+Plot of the linear model parameters.
+
+```{r models_thresh}
+
+thresholds_sm <- quantile(madagascar_malaria$LSTmean, seq(0.9, 0.1, length.out = 100))
+
+
+thresh_models_summary <- 
+  madagascar_malaria %>% 
+    group_by(ID) %>% 
+    summarise(prop = sapply(thresholds_sm, 
+                            \(x) weighted.mean(LSTmean > x, w = pop)),
+              threshold = round(thresholds_sm, 3),
+              case_rate = mean(case_rate)) %>% 
+    group_by(threshold) %>% 
+    do(fitThresh = tidy(lm(case_rate ~ prop, data = .), conf.int = TRUE)) %>% 
+    unnest(fitThresh)
+
+
+
+thresh_models_summary %>% 
+  filter(term == 'prop') %>% 
+  ggplot(aes(x = threshold, y = estimate)) + 
+    geom_ribbon(aes(ymin = conf.low, ymax = conf.high), fill = 'steelblue') +
+    geom_line()
+
+```
+
+
+
+
+
+Plot of the linear model parameters with simulated data.
+
+```{r models_thresh_sim}
+
+
+sim <- madagascar_malaria
+
+sim$pixel_case <- ((sim$LSTmean / 10) ^ 2) * sim$pop
+
+sim$pixel_case_pois <- sapply(sim$pixel_case, function(x) rpois(1, x))
+
+sim <- 
+  sim %>% 
+    group_by(ID) %>% 
+    mutate(cases = sum(pixel_case_pois),
+           case_rate = cases / agg_pop)
+
+thresholds_sm <- quantile(madagascar_malaria$LSTmean, seq(0.9, 0.1, length.out = 25))
+
+
+
+sim %>% 
+  group_by(ID) %>% 
+  summarise(prop = sapply(thresholds_sm, 
+                          \(x) weighted.mean(LSTmean > x, w = pop)),
+            threshold = round(thresholds_sm, 3),
+            case_rate = mean(case_rate)) %>% 
+  ggplot(aes(x = prop, y = case_rate, colour = threshold)) + 
+    geom_point() +
+    geom_smooth(method = 'lm', colour = 'black') +
+    facet_wrap(~ threshold)
+
+
+thresholds_sm <- quantile(madagascar_malaria$LSTmean, seq(0.9, 0.1, length.out = 100))
+
+
+thresh_models_summary <- 
+  sim %>% 
+    group_by(ID) %>% 
+    summarise(prop = sapply(thresholds_sm, 
+                            \(x) weighted.mean(LSTmean > x, w = pop)),
+              threshold = round(thresholds_sm, 3),
+              case_rate = mean(case_rate)) %>% 
+    group_by(threshold) %>% 
+    do(fitThresh = tidy(lm(case_rate ~ prop, data = .), conf.int = TRUE)) %>% 
+    unnest(fitThresh)
+
+
+
+thresh_models_summary %>% 
+  filter(term == 'prop') %>% 
+  ggplot(aes(x = threshold, y = estimate)) + 
+    geom_ribbon(aes(ymin = conf.low, ymax = conf.high), fill = 'steelblue') +
+    geom_line()
+
+```
+
+Now let's do a 3D version.
+
+```{r 3d_thresh}
 
 thresholds_sm <- quantile(madagascar_malaria$LSTmean, seq(0.1, 0.9, length.out = 25))
 
@@ -239,4 +469,134 @@ fig
 
 htmlwidgets::saveWidget(fig, file = '../../disag_outputs/lst_3d.html')
 ```
+
+
+
+
+Something about quantiles instead
+
+```{r small_multiples_thresh2}
+
+N <- 25
+diff <- 5
+quants <- seq(0.01, 0.99, length.out = N)
+quants2 <- quants[1:(N - diff)]
+quants <- quants[(diff + 1):N]
+
+
+in_group_quants <- 
+  madagascar_malaria %>% 
+    group_by(ID) %>% 
+    summarise(lower = sapply(seq_along(quants), 
+                            \(i) quantile(LSTmean, c(quants2[i]))),
+              upper = sapply(seq_along(quants), 
+                            \(i) quantile(LSTmean, c(quants[i]))),
+              lower_quant = round(quants2, 2),
+              upper_quant = round(quants, 2),
+              case_rate = mean(case_rate))
+  
+  
+in_group_quants %>% 
+  ggplot(aes(x = lower, y = upper, colour = case_rate)) + 
+    geom_point() +
+    # geom_smooth(method = 'lm', colour = 'black') +
+    facet_wrap(~ lower_quant) +
+    scale_colour_viridis_c()
+
+```
+
+
+Animated quantiles instead
+
+```{r small_multiples_thresh2}
+
+N <- 100
+diff <- 40
+quants <- seq(0.01, 0.99, length.out = N)
+quants2 <- quants[1:(N - diff)]
+quants <- quants[(diff + 1):N]
+
+in_group_quants <- 
+  madagascar_malaria %>% 
+    group_by(ID) %>% 
+    summarise(lower = sapply(seq_along(quants), 
+                            \(i) quantile(LSTmean, c(quants2[i]))),
+              upper = sapply(seq_along(quants), 
+                            \(i) quantile(LSTmean, c(quants[i]))),
+              lower_quant = round(quants2, 2),
+              upper_quant = round(quants, 2),
+              case_rate = mean(case_rate))
+  
+anim <- 
+  in_group_quants %>% 
+    ggplot(aes(x = lower, y = upper, colour = case_rate, size = case_rate)) + 
+      geom_point() +
+      # geom_smooth(method = 'lm', colour = 'black') +
+      transition_states(lower_quant) +
+      scale_colour_viridis_c()
+animate(anim, renderer = gifski_renderer())
+
+```
+
+```{r ranks}
+
+ranks <-
+  madagascar_malaria %>% 
+    distinct(ID, .keep_all = TRUE) %>% 
+    mutate(case_rate_rank = rank(case_rate)) %>% 
+    select(ID, case_rate_rank)
+           
+           
+madagascar_malaria %>% 
+  left_join(ranks) %>% 
+  ggplot(aes(x = LSTmean, y = case_rate_rank, colour = case_rate))  +
+    geom_point() +
+    scale_colour_viridis_c(option = 'E')
+
+```
+
+
+```{r ranks}
+
+ranks <-
+  madagascar_malaria %>% 
+    distinct(ID, .keep_all = TRUE) %>% 
+    mutate(case_rate_rank = rank(case_rate)) %>% 
+    select(ID, case_rate_rank)
+           
+           
+madagascar_malaria %>% 
+  left_join(ranks) %>% 
+  ggplot(aes(y = LSTmean, x = case_rate_rank, colour = case_rate))  +
+    geom_point() +
+    scale_colour_viridis_c(option = 'E') +
+    geom_smooth()
+
+```
+
+
+
+```{r summaries}
+
+madagascar_malaria %>% 
+  group_by(ID) %>% 
+  summarise(
+    `0.05quant` = quantile(LSTmean, 0.05),
+    `0.25quant` = quantile(LSTmean, 0.25),
+     `0.5quant` = median(LSTmean),
+    `0.75quant` = quantile(LSTmean, 0.75),
+    `0.95quant` = quantile(LSTmean, 0.95),
+    case_rate = mean(case_rate)) %>% 
+  ungroup %>% 
+  select(-ID) %>%
+  pivot_longer(-case_rate) %>% 
+  ggplot(aes(value, case_rate)) + 
+    facet_wrap(~ name, scale = 'free') +
+    geom_point() + 
+    geom_smooth()
+
+
+```
+
+
 
