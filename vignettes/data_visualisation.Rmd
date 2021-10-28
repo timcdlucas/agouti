@@ -98,7 +98,7 @@ ggplot(madagascar_malaria, aes(LSTmean, case_rate, colour = as.numeric(ID), alph
 While subsetting the data is definitely not ideal, we can perhaps pick out some 
 interesting groups.
 
-```{r naive_weights}
+```{r naive_weights2}
 
 maxx <-
   madagascar_malaria %>% 
@@ -150,7 +150,7 @@ madagascar_malaria %>%
 
 
 
-```{r naive_weights}
+```{r naive_weights3}
 ggplot(madagascar_malaria, aes(LSTmean, case_rate, colour = as.numeric(ID), alpha = pop)) + 
   geom_point()
 
@@ -509,7 +509,7 @@ in_group_quants %>%
 
 Animated quantiles instead
 
-```{r small_multiples_thresh2}
+```{r small_multiples_thresh3}
 
 N <- 100
 diff <- 40
@@ -557,7 +557,7 @@ madagascar_malaria %>%
 ```
 
 
-```{r ranks}
+```{r ranks2}
 
 ranks <-
   madagascar_malaria %>% 
