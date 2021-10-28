@@ -4,3 +4,4 @@ README.md
 README.Rmd
 NEWS.md
 ^\.github$
+vignettes/data_visualisation.Rmd
