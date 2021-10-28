@@ -509,7 +509,7 @@ in_group_quants %>%
 
 Animated quantiles instead
 
-```{r small_multiples_thresh3}
+```{r small_multiples_thresh4}
 
 N <- 100
 diff <- 40
