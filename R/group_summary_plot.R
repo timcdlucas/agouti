@@ -5,6 +5,7 @@
 #' @export
 #' @example
 #' 
+#' data(madagascar_malaria)
 #' group_summary_plot(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)
 
 

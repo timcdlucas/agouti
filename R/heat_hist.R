@@ -4,7 +4,7 @@
 #' 
 #' @export
 #' @example
-#' 
+#' data(madagascar_malaria)
 #' heat_hist(madagascar_malaria$EVI, madagascar_malaria$ID)
 
 heat_hist <- function(x, ID, weights = 1, breaks = 50){

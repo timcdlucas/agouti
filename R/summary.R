@@ -5,12 +5,11 @@
 #' 
 #' @export
 #' @example
-#' 
+#' data(madagascar_malaria)
 #' agouti_summary(madagascar_malaria)
 
 agouti_summary <- function(x, ID = ID){
-    
-    
+
     ID_char <- deparse(substitute(ID))
     
     n_groups <- length(unique(x[, ID_char, drop = TRUE]))

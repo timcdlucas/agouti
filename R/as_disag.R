@@ -40,6 +40,7 @@ as.disag.TimeSeries <- function(data, ...){
 #' @param lags An integer list given which lags should be used.
 #' @return Nothing at the moment
 #' @examples
+#' disag_data <- disag_from_temporal_dataframe()
 
 disag_from_temporal_dataframe <- function(data, lags){
 

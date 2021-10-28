@@ -6,7 +6,7 @@
 #' 
 #' @export
 #' @example
-#' 
+#' data(madagascar_malaria)
 #' link_plot(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)
 
 # Need to add a default for weights
@@ -35,7 +35,7 @@ link_plot <- function(formula, data, ID = ID, weights = weights){
 #' 
 #' @export
 #' @example
-#' 
+#' data(madagascar_malaria)
 #' heat_hist(madagascar_malaria$EVI, madagascar_malaria$ID)
 
 heat_hist <- function(x, ID, weights = 1, breaks = 50){
