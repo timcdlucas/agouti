@@ -23,6 +23,7 @@ LazyData: true
 Encoding: UTF-8
 RoxygenNote: 7.1.1
 Depends: 
+    dplyr,
     R (>= 2.10)
 Suggests: 
     rmarkdown,
