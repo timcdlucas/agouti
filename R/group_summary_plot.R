@@ -23,21 +23,21 @@ group_summary_plot <- function(formula, data, ID = ID, weights = weights){
     
     p1 <- 
     data %>% 
-        group_by(ID) %>% 
-        summarise(
+        dplyr::group_by(ID) %>% 
+        dplyr::summarise(
             `0.05quant` = quantile(.data[[x]], 0.05),
             `0.25quant` = quantile(.data[[x]], 0.25),
             `0.5quant` = median(.data[[x]]),
             `0.75quant` = quantile(.data[[x]], 0.75),
             `0.95quant` = quantile(.data[[x]], 0.95),
             response = mean(.data[[y]])) %>% 
-        ungroup %>% 
-        select(-ID) %>%
-        pivot_longer(-response) %>% 
-        ggplot(aes(value, response)) + 
-            facet_wrap(~ name, scale = 'free') +
-            geom_point() + 
-            geom_smooth()
+        dplyr::ungroup %>% 
+        dplyr::select(-.data$ID) %>%
+        tidyr::pivot_longer(-.data$response) %>% 
+        ggplot2::ggplot(ggplot2::aes(.data$value, .data$response)) + 
+            ggplot2::facet_wrap(~ .data$name, scale = 'free') +
+            ggplot2::geom_point() + 
+            ggplot2::geom_smooth()
     
     return(p1)   
 }

@@ -17,7 +17,7 @@ link_plot <- function(formula, data, ID = ID, weights = weights){
     
     p <- 
         data %>% 
-            ggplot2::ggplot(aes(y = .data[[y]], x = .data[[x]], 
+            ggplot2::ggplot(ggplot2::aes(y = .data[[y]], x = .data[[x]], 
                                 colour = as.numeric({{ ID }}), 
                                 group = factor({{ ID }}), alpha = {{ weights }})) +
                 ggplot2::geom_point() +

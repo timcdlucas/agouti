@@ -29,20 +29,20 @@ thresh_sm <- function(formula, data, ID = ID, weights = weights,
         data$weights <- 1
     }
     
-    thresholds_sm <- quantile(data[, x, drop = TRUE], 
+    thresholds_sm <- stats::quantile(data[, x, drop = TRUE], 
                               seq(lower_percentile, upper_percentile, length.out = small_mult))
     
     p1 <- 
     data %>% 
-        group_by({{ID}}) %>% 
-        summarise(prop = sapply(thresholds_sm, 
-                                \(t) weighted.mean(.data[[x]] > t, w = {{weights}})),
+        dplyr::group_by({{ID}}) %>% 
+        dplyr::summarise(prop = sapply(thresholds_sm, 
+                                \(t) stats::weighted.mean(.data[[x]] > t, w = {{weights}})),
                   threshold = round(thresholds_sm, 3),
                   response = mean(.data[[y]])) %>% 
-        ggplot(aes(x = prop, y = response, colour = threshold)) + 
-        geom_point() +
-        geom_smooth(method = 'lm', colour = 'black') +
-        facet_wrap(~ threshold)
+        ggplot2::ggplot(aes(x = prop, y = response, colour = threshold)) + 
+        ggplot2::geom_point() +
+        ggplot2::geom_smooth(method = 'lm', colour = 'black') +
+        ggplot2::facet_wrap(~ threshold)
     
     
     return(p1)   

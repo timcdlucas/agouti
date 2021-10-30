@@ -16,7 +16,9 @@ Imports:
     graphics,
     ggplot2,
     forcats,
-    dplyr
+    dplyr,
+    tidyr,
+    magrittr
 License: MIT + file LICENSE
 URL: https://github.com/timcdlucas/agouti
 LazyData: true
