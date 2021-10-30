@@ -35,7 +35,7 @@ agouti_summary <- function(x, ID = ID){
             dplyr::select(dplyr::all_of(not_agg_level)) %>% 
             dplyr::select_if(is.numeric) %>%
             dplyr::summarise_all(list(median = median, min = min, max = max)) %>% 
-            dplyr::ungroup %>% 
+            dplyr::ungroup() %>% 
             dplyr::select(- {{ID}}) %>% 
             dplyr::summarise_all(median) %>% 
             tidyr::pivot_longer(dplyr::everything()) %>% 
