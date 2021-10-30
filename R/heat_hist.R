@@ -1,7 +1,11 @@
 
 #' A grouped histogram plot.
 #' 
-#' 
+#' @importsFrom forcats fct_reorder
+#' @importaFrom ggplot2 aes
+#' @param x A numeric vector to be plotted as histograms.
+#' @param ID A character or factor vector to be used as a grouping variable.
+#' @param weights A numeric vector giving the weights.
 #' @export
 #' @examples
 #' data(madagascar_malaria)

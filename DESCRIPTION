@@ -2,13 +2,16 @@ Package: agouti
 Type: Package
 Title: Base classes and simple models for disaggregation regression models. 
     Potential name agouti (aggregate outputs ish or aggregat outputs I think)
-Version: 0.0.1
+Version: 0.1.1
 Date: 2021-08-28
 Author: Tim Lucas
 Maintainer: Tim Lucas <timcdlucas@gmail.com>
-Description: Disaggregation regression, or learning from aggregate outputs, has developed piecemeal with different researchers focussing on 
-	different aspects, such as spatial models. This package attempts to create a widely applicable base giving classes and simple models that
-	adequately capture the broad differences (mostly in terms of data structure, and link functions) while leaving the specific models for add
+Description: Disaggregation regression, or learning from aggregate outputs, has 
+    developed piecemeal with different researchers focussing on 
+	different aspects, such as spatial models. This package attempts to create 
+	a widely applicable base giving classes and simple models that
+	adequately capture the broad differences (mostly in terms of data 
+	structure, and link functions) while leaving the specific models for add
 	on packages.
 Imports:
     grDevices,
@@ -18,14 +21,14 @@ Imports:
     forcats,
     dplyr,
     tidyr,
-    magrittr
+    magrittr,
+    rlang
 License: MIT + file LICENSE
 URL: https://github.com/timcdlucas/agouti
 LazyData: true
 Encoding: UTF-8
 RoxygenNote: 7.1.1
 Depends: 
-    dplyr,
     R (>= 2.10)
 Suggests: 
     rmarkdown,

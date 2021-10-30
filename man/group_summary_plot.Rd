@@ -7,12 +7,20 @@ by taking quantiles, and then plots these quantiles against the response data.}
 \usage{
 group_summary_plot(formula, data, ID = ID, weights = weights)
 }
+\arguments{
+\item{formula}{A formula for the y and x variables.}
+
+\item{data}{A data frame suitable for aggregate outputs models.}
+
+\item{ID}{The column to use as the group ID column. Unquoted value.}
+
+\item{weights}{Which column to use as within group weights such as 
+  population or time.
+
+data(madagascar_malaria)
+group_summary_plot(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)}
+}
 \description{
 A function that summarises the groups within an aggregate output dataset, 
 by taking quantiles, and then plots these quantiles against the response data.
-}
-\examples{
-
-data(madagascar_malaria)
-group_summary_plot(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)
 }

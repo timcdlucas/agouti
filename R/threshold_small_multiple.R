@@ -10,6 +10,10 @@
 #' 
 #' @export
 #' @examples
+#' @inheritParams group_summary_plot
+#' @param small_mult How much small multiples to make.
+#' @param lower_percentile Lowest percentile to use
+#' @param upper_percentile Highest percentile to use
 #' data(madagascar_malaria)
 #' thresh_sm(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)
 
@@ -39,10 +43,10 @@ thresh_sm <- function(formula, data, ID = ID, weights = weights,
                                 \(t) stats::weighted.mean(.data[[x]] > t, w = {{weights}})),
                   threshold = round(thresholds_sm, 3),
                   response = mean(.data[[y]])) %>% 
-        ggplot2::ggplot(aes(x = prop, y = response, colour = threshold)) + 
+        ggplot2::ggplot(ggplot2::aes(x = .data$prop, y = .data$response, colour = .data$threshold)) + 
         ggplot2::geom_point() +
         ggplot2::geom_smooth(method = 'lm', colour = 'black') +
-        ggplot2::facet_wrap(~ threshold)
+        ggplot2::facet_wrap(~ .data$threshold)
     
     
     return(p1)   

@@ -5,6 +5,8 @@
 #' @importFrom magrittr %>% 
 #' @importFrom stats median quantile
 #' @importFrom rlang .data
+#' @param x A data frame suitable for use as aggregate output data.
+#' @param ID The column to use as the group ID column. Unquoted value.
 #' @export
 #' @examples
 #' data(madagascar_malaria)

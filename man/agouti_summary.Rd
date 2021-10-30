@@ -6,6 +6,11 @@
 \usage{
 agouti_summary(x, ID = ID)
 }
+\arguments{
+\item{x}{A data frame suitable for use as aggregate output data.}
+
+\item{ID}{The column to use as the group ID column. Unquoted value.}
+}
 \description{
 Summarise a aggregated output dataset.
 }

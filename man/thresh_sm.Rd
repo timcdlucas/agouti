@@ -15,13 +15,30 @@ thresh_sm(
   upper_percentile = 0.95
 )
 }
+\arguments{
+\item{formula}{A formula for the y and x variables.}
+
+\item{data}{A data frame suitable for aggregate outputs models.}
+
+\item{ID}{The column to use as the group ID column. Unquoted value.}
+
+\item{weights}{Which column to use as within group weights such as 
+  population or time.
+
+data(madagascar_malaria)
+group_summary_plot(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)}
+
+\item{small_mult}{How much small multiples to make.}
+
+\item{lower_percentile}{Lowest percentile to use}
+
+\item{upper_percentile}{Highest percentile to use
+data(madagascar_malaria)
+thresh_sm(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)}
+}
 \description{
 The plot is created by calculating, within each group, the proportion of 
 observations that are above a threshold. A scatter plot with a linear model
 is plotted of the relationship between this proportion and the aggregated output.
 The threshold is varied and small multiples of the different values are plotted.
-}
-\examples{
-data(madagascar_malaria)
-thresh_sm(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)
 }
