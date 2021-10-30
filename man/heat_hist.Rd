@@ -12,6 +12,8 @@ heat_hist(x, ID, weights = 1, breaks = 50)
 \item{ID}{A character or factor vector to be used as a grouping variable.}
 
 \item{weights}{A numeric vector giving the weights.}
+
+\item{breaks}{How many breaks to use.}
 }
 \description{
 A grouped histogram plot.

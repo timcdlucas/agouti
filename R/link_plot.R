@@ -5,7 +5,7 @@
 #' a line and colour coded to match.
 #' 
 #' @export
-#' @inheritParams heat_hist
+#' @inheritParams group_summary_plot
 #' @examples
 #' data(madagascar_malaria)
 #' link_plot(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)

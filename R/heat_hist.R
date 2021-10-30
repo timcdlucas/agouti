@@ -6,6 +6,7 @@
 #' @param x A numeric vector to be plotted as histograms.
 #' @param ID A character or factor vector to be used as a grouping variable.
 #' @param weights A numeric vector giving the weights.
+#' @param breaks How many breaks to use.
 #' @export
 #' @examples
 #' data(madagascar_malaria)
