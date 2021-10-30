@@ -5,3 +5,5 @@ README.Rmd
 NEWS.md
 ^\.github$
 vignettes/data_visualisation.Rmd
+data-raw/*
+current_check.txt
