@@ -3,17 +3,25 @@
 
 agouti <- function(formula, data, 
                    ID, inner_link, 
+                   outer_link,
                    family, weights, ...){
     
     
+    if(family$family == 'gaussian'){
+        densf <- dnorm
+    } else if(family$family == 'poisson'){
+        densf <- dpois
+    } else if(family$family == 'binomial'){
+        densf <- dbinom
+    }
     
-    
-    
+
     
 }
 
 
-nll <- function(beta, x, y, xID, yID, inner, outer, family, weights){
+nll <- function(beta, x, y, xID, yID, inner, 
+                outer, family, weights){
     
     linear_predictor <- t(beta %*% x)
     
