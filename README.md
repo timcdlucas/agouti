@@ -27,3 +27,9 @@ Furthermore, we hope that other packages that provide more complex analyses can 
 
 
 
+
+This is an agouti.
+    ![A photo of an agouti](man/figures/agouti.jpg)
+
+Photo credit: Geoff Gallice
+https://www.flickr.com/photos/dejeuxx/5768944310/
