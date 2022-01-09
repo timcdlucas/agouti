@@ -39,7 +39,7 @@ test_that('nll works with 1 covariate.', {
 })
 
 
-test_that('Objective function works', {
+test_that('Objective function works with gaussian.', {
   
   set.seed(1)
   N1 <- 50
@@ -66,10 +66,34 @@ test_that('Objective function works', {
 })
 
 
-test_that('We can optimise a model', {
+test_that('agout function works with gaussian.', {
   
+  set.seed(1)
+  N1 <- 50
+  N2 <- 10
+  ncovs <- 2
   
-  out <- agouti()
+  beta <- c(0.1, -0.4)
+  x <- matrix(rnorm(N1 * ncovs), ncol = 2)
+  yy <- rnorm(N1)
+  ID <- sample(letters[seq(N2)], N1, replace = TRUE)
+  weights <- runif(N1)
+  
+  d <- data.frame(x, yy, ID, weights)
+  
+  inner <- 'identity'
+  outer <- 'identity'
+  
+  family <- gaussian()
+  
+  out <- agouti(formula, data,
+                ID, inner_link,
+                outer_link,
+                family, weights)
+    
+  
+  expect_true(class(out) == 'agouti')
+
   
 })
 
