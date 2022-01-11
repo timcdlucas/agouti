@@ -67,8 +67,8 @@ agoutiGLM <- function(formula, data,
          logit = function(x) qlogis(x),
          probit = function(x) qnorm(x))
   
-  inner <- do.call(switch, c(inner_link, inner))
-  outer <- do.call(switch, c(outer_link, inner))
+  inner <- do.call(switch, c(inner_link, links))
+  outer <- do.call(switch, c(outer_link, links))
   
 
   
@@ -77,9 +77,11 @@ agoutiGLM <- function(formula, data,
 
   fit <- maxLik::maxLik(ll, start = rep(0, ncol(X)))
   
+  hess <- numDeriv::hessian(ll, fit$estimate)
+  
   est <- fit$estimate
   
-  se <- sqrt(diag(solve(-fit$hessian)))
+  se <- sqrt(diag(solve(-hess)))
   
   CI <- rbind(est - 1.96 * se, 
               est + 1.96 * se)

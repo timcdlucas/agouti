@@ -23,7 +23,8 @@ Imports:
     tidyr,
     magrittr,
     rlang,
-    maxLik
+    maxLik,
+    numDeriv
 Suggests: 
     rmarkdown,
     knitr,
