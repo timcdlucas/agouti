@@ -1,23 +1,4 @@
 
-# 
-# ff <- function(formula, data,
-#                      ID, inner_link,
-#                      outer_link,
-#                      family, weights){
-# 
-#   m <- match.call()
-#    mf <- match.call(expand.dots = FALSE)
-#   return(list(m, mf))
-# }
-# 
-# call <- ff(formula = form, d,
-#         ID = ID, inner,
-#         outer,
-#         family, weights)
-# m <- call[[1]]
-# mf <- call[[2]]
-
-
 
 agouti <- function(formula, data,
                    ID, inner_link,
