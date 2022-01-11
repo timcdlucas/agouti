@@ -1,6 +1,6 @@
 context('Test the model fitting functions fully')
 
-test_that('nll works with Gaussian family.', {
+test_that('loglike works with Gaussian family.', {
   
   # nll <- function(beta, x, y, ID, inner,
   #                outer, likelihood_function, weights){
@@ -10,29 +10,52 @@ test_that('nll works with Gaussian family.', {
   ncovs <- 2
     
   beta <- c(0.1, -0.4)
-  x <- matrix(rnorm(N1 * ncovs), ncol = 2)
-  yy <- rnorm(N1)
-  ID <- sample(letters[seq(N2)], N1, replace = TRUE)
+  x <- matrix(rnorm(N1 * ncovs), ncol = ncovs)
+  order <- sample(seq(N2), N1, replace = TRUE)
+  ID <- letters[order]
+  yy <- rnorm(N2)[order]
+  
   weights <- runif(N1)
   inner <- function(x) x
   outer <- function(x) x
 
   likelihood_function <- function(yhat, y, theta) dnorm(yhat, y, 3, log = TRUE)
 
-  out <- nll(beta, x, yy, ID, inner, outer, likelihood_function, weights)
+  out <- loglike(beta, x, yy, ID, inner, outer, likelihood_function, weights)
 
-  expect_true(all(!(is.na(out$nll))))
-  expect_true(all(!(is.nan(out$nll))))
+  expect_true(all(!(is.na(out$loglike))))
+  expect_true(all(!(is.nan(out$loglike))))
   
 
 })
 
 
 
-test_that('nll works with 1 covariate.', {
+test_that('loglike works with 1 covariate.', {
   
-  beta <- 2
-    
+  
+  # nll <- function(beta, x, y, ID, inner,
+  #                outer, likelihood_function, weights){
+  set.seed(1)
+  N1 <- 50
+  N2 <- 10
+  ncovs <- 1
+  
+  beta <- c(0.1, -0.4)
+  x <- matrix(rnorm(N1 * ncovs), ncol = ncovs)
+  order <- sample(seq(N2), N1, replace = TRUE)
+  ID <- letters[order]
+  yy <- rnorm(N2)[order]
+  weights <- runif(N1)
+  inner <- function(x) x
+  outer <- function(x) x
+  
+  likelihood_function <- function(yhat, y, theta) dnorm(yhat, y, 3, log = TRUE)
+  
+  out <- loglike(beta, x, yy, ID, inner, outer, likelihood_function, weights)
+  
+  expect_true(all(!(is.na(out$loglike))))
+  expect_true(all(!(is.nan(out$loglike))))    
     
     
     
@@ -47,20 +70,21 @@ test_that('Objective function works with gaussian.', {
   ncovs <- 2
   
   beta <- c(0.1, -0.4)
-  x <- matrix(rnorm(N1 * ncovs), ncol = 2)
-  yy <- rnorm(N1)
-  ID <- sample(letters[seq(N2)], N1, replace = TRUE)
+  x <- matrix(rnorm(N1 * ncovs), ncol = ncovs)
+  order <- sample(seq(N2), N1, replace = TRUE)
+  ID <- letters[order]
+  yy <- rnorm(N2)[order]
   weights <- runif(N1)
   inner <- function(x) x
   outer <- function(x) x
   
   likelihood_function <- function(yhat, y, theta) dnorm(yhat, y, 3, log = TRUE)
-  nll_val <- objective(beta, x, yy, ID, inner, outer, likelihood_function, weights)
+  ll_val <- objective(beta, x, yy, ID, inner, outer, likelihood_function, weights)
   
   
-  expect_true(length(nll_val) == 1)
-  expect_true(!is.na(nll_val))
-  expect_true(is.numeric(nll_val))
+  expect_true(length(ll_val) == 1)
+  expect_true(!is.na(ll_val))
+  expect_true(is.numeric(ll_val))
   
   
 })
@@ -74,9 +98,10 @@ test_that('agouti function works with gaussian.', {
   ncovs <- 2
   
   beta <- c(0.1, -0.4)
-  x <- matrix(rnorm(N1 * ncovs), ncol = 2)
-  yy <- rnorm(N1)
-  ID <- sample(letters[seq(N2)], N1, replace = TRUE)
+  x <- matrix(rnorm(N1 * ncovs), ncol = ncovs)
+  order <- sample(seq(N2), N1, replace = TRUE)
+  ID <- letters[order]
+  yy <- rnorm(N2)[order]
   weights <- runif(N1)
   
   d <- data.frame(x, yy, ID, weights)
@@ -89,13 +114,13 @@ test_that('agouti function works with gaussian.', {
   form <- yy ~ X1 + X2
   
 
-  out <- agouti(formula = form, d,
+  out <- agoutiGLM(formula = form, d,
                 ID = ID, inner,
                 outer,
                 family, weights)
     
   
-  expect_true(class(out) == 'agouti')
+  expect_true(class(out) == 'agoutiGLM')
 
   
 })
@@ -110,9 +135,10 @@ test_that('agouti function works with 1 covariate', {
   ncovs <- 2
   
   beta <- c(0.1, -0.4)
-  x <- matrix(rnorm(N1 * ncovs), ncol = 2)
-  yy <- rnorm(N1)
-  ID <- sample(letters[seq(N2)], N1, replace = TRUE)
+  x <- matrix(rnorm(N1 * ncovs), ncol = ncovs)
+  order <- sample(seq(N2), N1, replace = TRUE)
+  ID <- letters[order]
+  yy <- rnorm(N2)[order]
   weights <- runif(N1)
   
   d <- data.frame(x, yy, ID, weights)
@@ -125,13 +151,13 @@ test_that('agouti function works with 1 covariate', {
   form <- yy ~ X1
   
   
-  out <- agouti(formula = form, d,
+  out <- agoutiGLM(formula = form, d,
                 ID = ID, inner,
                 outer,
                 family, weights)
   
   
-  expect_true(class(out) == 'agouti')
+  expect_true(class(out) == 'agoutiGLM')
   expect_true(length(out$coefficients) == 2)
   
   
@@ -146,9 +172,10 @@ test_that('agouti function works with interactions, squared covs and factors', {
   ncovs <- 2
   
   beta <- c(0.1, -0.4)
-  x <- matrix(rnorm(N1 * ncovs), ncol = 2)
-  yy <- rnorm(N1)
-  ID <- sample(letters[seq(N2)], N1, replace = TRUE)
+  x <- matrix(rnorm(N1 * ncovs), ncol = ncovs)
+  order <- sample(seq(N2), N1, replace = TRUE)
+  ID <- letters[order]
+  yy <- rnorm(N2)[order]
   weights <- runif(N1)
   
   d <- data.frame(x, yy, ID, weights)
@@ -161,13 +188,13 @@ test_that('agouti function works with interactions, squared covs and factors', {
   form1 <- yy ~ X1 + poly(X2, 2)
   
   
-  out1 <- agouti(formula = form1, d,
+  out1 <- agoutiGLM(formula = form1, d,
                 ID = ID, inner,
                 outer,
                 family, weights)
   
   
-  expect_true(class(out1) == 'agouti')
+  expect_true(class(out1) == 'agoutiGLM')
   expect_true(length(out1$coefficients) == 4)
   
   
@@ -176,13 +203,13 @@ test_that('agouti function works with interactions, squared covs and factors', {
   form2 <- yy ~ X1 * X2
   
   
-  out2 <- agouti(formula = form2, d,
+  out2 <- agoutiGLM(formula = form2, d,
                  ID = ID, inner,
                  outer,
                  family, weights)
   
   
-  expect_true(class(out2) == 'agouti')
+  expect_true(class(out2) == 'agoutiGLM')
   expect_true(length(out2$coefficients) == 4)
   
   d2 <- d
@@ -190,13 +217,13 @@ test_that('agouti function works with interactions, squared covs and factors', {
 
   form <- yy ~ X1 + X2
   
-  out3 <- agouti(formula = form, d2,
+  out3 <- agoutiGLM(formula = form, d2,
                  ID = ID, inner,
                  outer,
                  family, weights)
   
   
-  expect_true(class(out3) == 'agouti')
+  expect_true(class(out3) == 'agoutiGLM')
   expect_true(length(out3$coefficients) == 4)
   
 })

@@ -100,17 +100,18 @@ loglike <- function(beta, x, y, ID, inner,
         d %>%
         dplyr::group_by(ID) %>%
         dplyr::summarise(summed = sum(summand),
-                  yhat = outer(summed))
+                         yhat = outer(summed))
 
-    ydf <- data.frame(y, ID)
+    ydf <- data.frame(y, ID) %>% 
+             dplyr::distinct(y, ID)
 
     
-    dsum <-
+    dsum_join <-
         dsum %>%
             dplyr::left_join(ydf, by = c('ID' = 'ID')) %>%
             dplyr::mutate(loglike = likelihood_function(yhat, y, theta))
 
-  return(dsum)
+  return(dsum_join)
 }
 
 
