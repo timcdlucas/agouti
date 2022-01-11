@@ -4,7 +4,16 @@
 \alias{agoutiGLM}
 \title{Fit an aggregated output GLM}
 \usage{
-agoutiGLM(formula, data, ID, inner_link, outer_link, family, weights, ...)
+agoutiGLM(
+  formula,
+  data,
+  ID,
+  inner_link = "identity",
+  outer_link = "identity",
+  family = gaussian(),
+  weights,
+  ...
+)
 }
 \arguments{
 \item{formula}{A formula for the y and x variables.}
@@ -32,6 +41,4 @@ approximation to the likelihood surface.
 }
 \examples{
 data(madagascar_malaria)
-agoutiGLM(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, 
-          weights = pop)
 }
