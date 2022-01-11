@@ -10,7 +10,7 @@ agoutiGLM(
   ID,
   inner_link = "identity",
   outer_link = "identity",
-  family = gaussian(),
+  family = stats::gaussian(),
   weights,
   ...
 )
