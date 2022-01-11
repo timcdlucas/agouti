@@ -1,7 +1,7 @@
 Package: agouti
 Type: Package
 Title: Base classes and simple models for disaggregation regression models. 
-    Potential name agouti (aggregate outputs ish or aggregat outputs I think)
+    Potential name agouti (aggregate outputs ish)
 Version: 0.1.1
 Date: 2021-08-28
 Author: Tim Lucas
@@ -24,6 +24,10 @@ Imports:
     magrittr,
     rlang,
     maxLik
+Suggests: 
+    rmarkdown,
+    knitr,
+    testthat
 License: MIT + file LICENSE
 URL: https://github.com/timcdlucas/agouti
 LazyData: true
@@ -31,7 +35,4 @@ Encoding: UTF-8
 RoxygenNote: 7.1.1
 Depends: 
     R (>= 2.10)
-Suggests: 
-    rmarkdown,
-    knitr
 VignetteBuilder: knitr
