@@ -52,9 +52,26 @@ agoutiGLM <- function(formula, data,
   if(family$family == 'gaussian'){
     likelihood_function <- function(yhat, y, theta) stats::dnorm(yhat, y, 3, log = TRUE)
   }
-  if(inner_link == 'identity') inner <- function(x) x
-  if(outer_link == 'identity') outer <- function(x) x
 
+  
+  links <- 
+    list(identity = function(x) x,
+         exp = function(x) exp(x),
+         logit = function(x) plogis(x),
+         probit = function(x) pnorm(x))
+  
+  
+  inverse_links <- 
+    list(identity = function(x) x,
+         exp = function(x) log(x),
+         logit = function(x) qlogis(x),
+         probit = function(x) qnorm(x))
+  
+  inner <- do.call(switch, c(inner_link, inner))
+  outer <- do.call(switch, c(outer_link, inner))
+  
+
+  
   ll <- function(beta) objective(beta, X, Y, ID, inner, outer, likelihood_function, weights)
   
 
