@@ -27,7 +27,7 @@
 agoutiGLM <- function(formula, data,
                       ID, inner_link = 'identity',
                       outer_link = 'identity',
-                      family = gaussian(), weights, ...){
+                      family = stats::gaussian(), weights, ...){
   
     
   # mostly stolen from glm as I want it to be consistent.
