@@ -138,7 +138,7 @@ test_that('agouti function works with 1 covariate', {
   
 })
 
-test_that('agouti function works with interactions and squared covs', {
+test_that('agouti function works with interactions, squared covs and factors', {
   
   set.seed(1)
   N1 <- 50
@@ -185,7 +185,19 @@ test_that('agouti function works with interactions and squared covs', {
   expect_true(class(out2) == 'agouti')
   expect_true(length(out2$coefficients) == 3)
   
+  d2 <- d
+  d2$X2 <- factor(cut(d2$X2, c(-10, -1, 1, 10)))
+
+  form <- yy ~ X1 + X2
   
+  out3 <- agouti(formula = form, d2,
+                 ID = ID, inner,
+                 outer,
+                 family, weights)
+  
+  
+  expect_true(class(out3) == 'agouti')
+  expect_true(length(out3$coefficients) == 4)
   
 })
 
