@@ -125,7 +125,89 @@ test_that('agouti function works with gaussian.', {
   
 })
 
-test_that('agouti function works with different link functions', {})
+test_that('agouti function works with different link functions', {
+  
+  
+  set.seed(1)
+  N1 <- 50
+  N2 <- 10
+  ncovs <- 2
+  
+  x <- matrix(rnorm(N1 * ncovs), ncol = ncovs)
+  order <- sample(seq(N2), N1, replace = TRUE)
+  ID <- letters[order]
+  weights <- runif(N1)
+  
+  
+  family <- gaussian()
+  
+  form <- yy ~ X1 + X2
+  
+  yy <- exp(rnorm(N2)[order])
+  d <- data.frame(x, yy, ID, weights)
+  
+  out1 <- agoutiGLM(formula = form, d,
+                   ID = ID, inner_link = 'exp',
+                   outer_link,
+                   family, weights)
+  
+  yy <- plogis(rnorm(N2)[order])
+  d <- data.frame(x, yy, ID, weights)
+  
+  out2 <- agoutiGLM(formula = form, d,
+                    ID = ID, inner_link = 'logit',
+                    outer_link,
+                    family, weights)
+  
+  
+  out3 <- agoutiGLM(formula = form, d,
+                    ID = ID, inner_link = 'probit',
+                    outer_link,
+                    family, weights)
+  
+  
+  out4 <- agoutiGLM(formula = form, d,
+                    ID = ID, inner_link = 'identity',
+                    outer_link = 'exp',
+                    family, weights)
+  
+  
+  out5 <- agoutiGLM(formula = form, d,
+                    ID = ID, inner_link = 'identity',
+                    outer_link = 'logit',
+                    family, weights)
+  
+  
+  out5 <- agoutiGLM(formula = form, d,
+                    ID = ID, inner_link = 'identity',
+                    outer_link = 'probit',
+                    family, weights)
+  
+  yy <- exp(rnorm(N2, 5)[order])
+  d <- data.frame(x, yy, ID, weights)
+  
+  out6 <- agoutiGLM(formula = form, d,
+                    ID = ID, inner_link = 'exp',
+                    outer_link = 'exp',
+                    family, weights)
+  
+  # Doesn't currently work but haven't really thought
+  # about it if makes sense yet.
+  # out7 <- agoutiGLM(formula = form, d,
+  #                   ID = ID, inner_link = 'logit',
+  #                   outer_link = 'exp',
+  #                   family, weights)
+  
+  expect_true(class(out1) == 'agoutiGLM')
+  expect_true(class(out2) == 'agoutiGLM')
+  expect_true(class(out3) == 'agoutiGLM')
+  expect_true(class(out4) == 'agoutiGLM')
+  expect_true(class(out5) == 'agoutiGLM')
+  expect_true(class(out6) == 'agoutiGLM')
+  
+  
+  
+})
 
 test_that('agouti function works with 1 covariate', {
   
