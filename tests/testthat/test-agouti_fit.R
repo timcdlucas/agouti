@@ -158,7 +158,7 @@ test_that('agouti function works with interactions, squared covs and factors', {
   
   family <- gaussian()
   
-  form1 <- yy ~ X1 + I(X2^2)
+  form1 <- yy ~ X1 + poly(X2, 2)
   
   
   out1 <- agouti(formula = form1, d,
@@ -168,7 +168,7 @@ test_that('agouti function works with interactions, squared covs and factors', {
   
   
   expect_true(class(out1) == 'agouti')
-  expect_true(length(out1$coefficients) == 3)
+  expect_true(length(out1$coefficients) == 4)
   
   
   
@@ -183,7 +183,7 @@ test_that('agouti function works with interactions, squared covs and factors', {
   
   
   expect_true(class(out2) == 'agouti')
-  expect_true(length(out2$coefficients) == 3)
+  expect_true(length(out2$coefficients) == 4)
   
   d2 <- d
   d2$X2 <- factor(cut(d2$X2, c(-10, -1, 1, 10)))
