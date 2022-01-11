@@ -22,15 +22,16 @@ agoutiGLM(formula, data, ID, inner_link, outer_link, family, weights, ...)
 \item{weights}{Which column to use as within group weights such as 
 population or time.}
 
-\item{...}{Further parameters. Currently unused.
-
-data(madagascar_malaria)
-agoutiGLM(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, 
-          weights = pop)}
+\item{...}{Further parameters. Currently unused.}
 }
 \description{
 This function has flexibility for link functions both inside and outside the
 aggregation step as well as a variety of error models. The models are fitted
 with maximum likelihood and confidence intervals are given using the normal
 approximation to the likelihood surface.
+}
+\examples{
+data(madagascar_malaria)
+agoutiGLM(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, 
+          weights = pop)
 }

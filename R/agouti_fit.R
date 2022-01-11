@@ -6,7 +6,6 @@
 #' approximation to the likelihood surface.
 #' 
 #' @export
-#' @examples
 #' @param formula A formula for the y and x variables.
 #' @param data A data frame suitable for aggregate outputs models.
 #' @param ID The column to use as the group ID column. Unquoted value.
@@ -17,6 +16,7 @@
 #'   population or time.
 #' @param ... Further parameters. Currently unused.
 #' 
+#' @examples
 #' data(madagascar_malaria)
 #' agoutiGLM(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, 
 #'           weights = pop)
