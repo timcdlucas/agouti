@@ -23,36 +23,37 @@ agouti <- function(formula, data,
                    ID, inner_link,
                    outer_link,
                    family, weights, ...){
-
   
-# mostly stolen from glm as I want it to be consistent.
-if(is.character(family)) family <- get(family, mode = "function", envir = parent.frame()) 
-if(is.function(family)) family <- family() 
-if(is.null(family$family)) {	
-  print(family)	
-  stop("'family' not recognized") 
-}
-
-
-if(!is.null(weights) && !is.numeric(weights)) stop("'weights' must be a numeric vector") ## check weights and offset 
-if( !is.null(weights) && any(weights < 0) )	stop("negative weights not allowed")
-
-mf <- model.frame(formula = formula, data = data,
-                  subset = NULL, weights = weights)
-
-
-X <- model.matrix(formula, mf)
-Y <- model.response(mf, "any") # e.g. factors are allowed ## avoid problems with 1D arrays, but keep names
+    
+  # mostly stolen from glm as I want it to be consistent.
+  if(is.character(family)) family <- get(family, mode = "function", envir = parent.frame()) 
+  if(is.function(family)) family <- family() 
+  if(is.null(family$family)) {	
+    print(family)	
+    stop("'family' not recognized") 
+  }
   
-  if(family$family == 'Gaussian'){
+  
+  if(!is.null(weights) && !is.numeric(weights)) stop("'weights' must be a numeric vector") ## check weights and offset 
+  if( !is.null(weights) && any(weights < 0) )	stop("negative weights not allowed")
+  
+  mf <- model.frame(formula = formula, data = data,
+                    subset = NULL, weights = weights)
+  
+  
+  X <- model.matrix(formula, mf)
+  Y <- model.response(mf, "any") # e.g. factors are allowed ## avoid problems with 1D arrays, but keep names
+  
+  if(family$family == 'gaussian'){
     likelihood_function <- function(yhat, y, theta) dnorm(yhat, y, 3, log = TRUE)
   }
   if(inner_link == 'identity') inner <- function(x) x
   if(outer_link == 'identity') outer <- function(x) x
 
-  ll <- function(beta) objective(beta, x, yy, ID, inner, outer, likelihood_function, weights)
+  ll <- function(beta) objective(beta, X, Y, ID, inner, outer, likelihood_function, weights)
   
-  fit <- maxLik::maxLik(ll, start = rep(0, length(beta)))
+
+  fit <- maxLik::maxLik(ll, start = rep(0, ncol(X)))
   
   est <- fit$estimate
   
