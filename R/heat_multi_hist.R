@@ -22,10 +22,12 @@ heat_multi_hist <- function(y, ID, data,weights = 1, breaks = 50){
   d <- data.frame(x, ID = ID, weights = weights)
 
   if(z==1){
+    bins <- diff(range(d$x[!(is.na(d$x))]))
     p1 <-
       ggplot2::ggplot(d, ggplot2::aes(x = .data$x, y = .data$ID, weights = .data$weights)) +
       ggplot2::geom_bin_2d(
-        binwidth = c(diff(range(x)) / breaks, 1)
+        #binwidth = c(diff(range(x)) / breaks, 1)
+        binwidth = c(bins / breaks, 1)
       ) +
       ggplot2::scale_fill_viridis_c() +
       ggplot2::theme(panel.grid.minor.y = ggplot2::element_blank(),
@@ -37,11 +39,12 @@ heat_multi_hist <- function(y, ID, data,weights = 1, breaks = 50){
   }
   else if(z!=1){
     dd <- tidyr::pivot_longer(data=d,cols=all_of(y))
-
+    bins <- diff(range(d$x[!(is.na(d$x))]))
     p1 <-
       ggplot2::ggplot(dd, ggplot2::aes(x = value, y = ID, weights = weights)) +
       ggplot2::geom_bin_2d(
-        binwidth = c(diff(range(x)) / breaks, 1)
+        #binwidth = c(diff(range(x)) / breaks, 1)
+        binwidth = c(bins / breaks, 1)
       ) +
       ggplot2::scale_fill_viridis_c() +
       ggplot2::facet_wrap(~name, scales="free") +
