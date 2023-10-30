@@ -46,21 +46,36 @@ as.disag.data.frame <- function (data, ...){
 
 #' Create a data.frame suitable for disaggregation regression modelling from
 #' a spatial polygons dataframe.
-#' rstack,sp_df and data must contain an ID col to join between.
+#' sp_df and data must contain an ID col to join between.
+#' #' @section More stuff
+#'
+#' @export
+#' @param data A spatial polygons data frame with a column named ID
+#' @param rstack A raster stack of rasters to be summarised at ID level
+#' @param response a dataframe containing the response data and an ID variable
 
-as.disag.SpatialPolygonsDataFrame <- function (data, rstack, sp_df, ...){
+as_disag.SpatialPolygonsDataFrame <- function (data, rstack, response){
 
   ## first need some checks on each of the objects
+  if(!("ID" %in% names(data@data)))
+    stop("ID varible not found in data, please check")
+  if(!("ID" %in% names(response)))
+    stop("ID varible not found in response data, please check")
+
+  if(!(all(unique(response$ID) %in% unique(data@data$ID))))
+    stop("Some IDs in response data are not in spatial polygons dataframe")
 
   ## use the extract function from disagreggation package to extra data from raster stack at polygon level
-  cl <- parallel::makeCluster(2)
+  nCores <- parallel::detectCores()-8
+  cl <- parallel::makeCluster(nCores)
   doParallel::registerDoParallel(cl)
-  print("Extracting data from raster stack, this may take a while..")
-  result <- disaggregation::parallelExtract(world_sub, shape, id="fipscode",fun=NULL)
+  print("Extracting data from raster stack, this may take a while...")
+  result <- disaggregation::parallelExtract(rstack, data, id="ID",fun=NULL)
   parallel::stopCluster(cl)
 
-  data <- left_join(data, result, by = "ID")
-  return(data)
+  response <- left_join(response, result, by = "ID")
+  return(response)
+
 
 }
 
@@ -79,15 +94,16 @@ as.disag.SpatialPolygonsDataFrame <- function (data, rstack, sp_df, ...){
 #' @return Nothing at the moment
 #' @method as_disag class
 #' @examples
-#' disag_data <- as_disag.timeseries(stocks, lags=10, ID="add")
+#' disag_data <- as_disag(stocks, lags=10, ID="add")
 
-as_disag.timeseries <- function(data,lags=10, ID="add"){
+as_disag.ts <- function(data,lags=10, ID="add",...){
 
 
   if(!(is.ts(data) | is.mts(data)))
      stop("Data object is not of class time-series")
+## below wouldn't work if it was mts.
+  ## Just some formatting, probs a better way of doing this
 
-  ## Just some formatting, probs a better way of doing this, basically force it to be a ts obj for no reason
   data <- as.vector(data2)
   data <- as.data.frame(data)
   data <- data %>% rename(response=data)
@@ -121,7 +137,7 @@ as_disag.timeseries <- function(data,lags=10, ID="add"){
 
 
 #' Create a data.frame suitable for disaggregation regression modelling from
-#' a time series object.
+#' a temporal dataframe object.
 #'
 #' A series of lagged variables can be considered similar to disaggregation
 #' regression if we think that the order of the lagged variables is unimportant.
@@ -132,14 +148,34 @@ as_disag.timeseries <- function(data,lags=10, ID="add"){
 #' @section More stuff
 #'
 #' @export
-#' @param data A time series data vector representing response e.g. in stock data the growth
-#' @param lags An integer list given which lags should be used.
+#' @param data
+#' @param time_group what is the format of the datetime variable at the level of the response in date-time format
 #' @param ID Either the name of the grouping variable or "add" which means an ID variable will be added 1:nrow()
+#' @param response
 #' @return Nothing at the moment
 #' @examples
-#' disag_data <- disag_from_temporal_dataframe(stocks, lags=10, ID="add")
+#' disag_data <- disag_from_temporal_dataframe(resp_mortality, lag, ID="add")
 
-disag_from_temporal_dataframe <- function(data, lags, ID="add"){
+as_disag.POSIXt <- function(data = data$Datetime, time_group="%Y%m%d", ID="add",response, outcome="Death"){
 
+  if(!(lubridate::is.POSIXt(data) | lubridate::is.Date(data)))
+    stop("Data object is not of class date-time")
+
+  if(ID=="add"){
+    data2 <- response %>%
+      mutate(ID=format(Datetime, time_group)) %>%
+      group_by(ID) %>%
+      mutate(outcome=sum(get(outcome),na.rm=TRUE))
+
+  }
+
+  ## check if every row with the same ID has the same response
+  df <- data2 %>% group_by(ID) %>%
+    mutate(unique_response = n_distinct(outcome))
+
+  if(any(df$unique_response > 1))
+    stop("Different responses found within the same ID group")
+
+  return(data2)
 
 }
