@@ -12,10 +12,18 @@ as_disag <- function(data,...){
   UseMethod("as_disag")
 }
 
-# the default method for this generic function is just to check if that data is already in the correct format
-## examples are the madagascar_malaria and stock_data datasets these are already in the correct format
-# requires tidyverse
-as_disag.default <- function(data,response="response",ID=ID){
+#' Checks if a given dataframe is in the correct format for agouti functions
+#'
+#' @export
+#' @param data A dataframe containing a response variable, ID variable and any predictors
+#' @param response The name of the variable containing the response data
+#' @return \code{as_disag.default} returns a dataframe that can be used with all agouti functions.
+#' @method as_disag default
+#' @examples
+#' disag_data <- as_disag(data=madagascar_malaria, response="case_rate")
+
+
+as_disag.default <- function(data,response="response", single_df=TRUE){
 
   responsename <- response
 
@@ -35,46 +43,80 @@ as_disag.default <- function(data,response="response",ID=ID){
 
 
   print("Congrats, your data is in as_disag format")
+  class(data) <- append("as_disag", class(data))
   return(data)
 
 }
 
+#' Checks if a given dataframe is in the correct format for agouti functions
+#'
+#' @export
+#' @param data A dataframe containing a outcome variable and ID variable named ID
+#' @param data2 A dataframe containing predictor variables at a different resolution to the outcome but with the same linking ID variable
+#' @param outcome The name of the variable containing the response data
+#' @return \code{as_disag.data.frame} returns a dataframe that can be used with all agouti functions.
+#' @method as_disag data.frame
+#' @examples
+#' disag_data <- as_disag(data=temp_outcome, data2=temp_predictor, outcome="Death")
+as_disag.data.frame <- function (data,data2,outcome,single_df=FALSE,...){
 
-as.disag.data.frame <- function (data, ...){
+  if(!("ID" %in% names(data)))
+    stop("ID varible not found in outcome data, please check")
+  if(!("ID" %in% names(data2)))
+    stop("ID varible not found in predictor data, please check")
+
+  if(!(all(unique(data$ID) %in% unique(data2$ID))))
+    stop("Some IDs in outcome data are not in predictor data")
+
+  ## count how many rows of data we have for each ID. want this to be general in case people have groups of different sizes due to missing data
+  data_summ <- dplyr::left_join(data2, data, by="ID")
+
+  ## check if every row with the same ID has the same response
+  df <- data_summ %>% group_by(ID) %>%
+    mutate(unique_response = n_distinct(outcome))
+
+  if(any(df$unique_response > 1))
+    stop("Different responses found within the same ID group")
+
+  class(data_summ) <- append("as_disag", class(data_summ))
+  return(data_summ)
 
 }
 
 #' Create a data.frame suitable for disaggregation regression modelling from
 #' a spatial polygons dataframe.
-#' sp_df and data must contain an ID col to join between.
-#' #' @section More stuff
 #'
 #' @export
 #' @param data A spatial polygons data frame with a column named ID
 #' @param rstack A raster stack of rasters to be summarised at ID level
-#' @param response a dataframe containing the response data and an ID variable
+#' @param response_df a dataframe containing the response data and an ID variable
+#' @return \code{as_disag.SpatialPolygonsDataFrame} returns a dataframe that can be used with all agouti functions.
+#' @method as_disag SpatialPolygonsDataFrame
+#' @examples
+#' disag_data <- as_disag(data=shapefile, rstack=rstack, response=wnv)
 
-as_disag.SpatialPolygonsDataFrame <- function (data, rstack, response){
+as_disag.SpatialPolygonsDataFrame <- function (data, rstack, response_df){
 
   ## first need some checks on each of the objects
   if(!("ID" %in% names(data@data)))
     stop("ID varible not found in data, please check")
-  if(!("ID" %in% names(response)))
+  if(!("ID" %in% names(response_df)))
     stop("ID varible not found in response data, please check")
 
-  if(!(all(unique(response$ID) %in% unique(data@data$ID))))
+  if(!(all(unique(response_df$ID) %in% unique(data@data$ID))))
     stop("Some IDs in response data are not in spatial polygons dataframe")
 
-  ## use the extract function from disagreggation package to extra data from raster stack at polygon level
-  nCores <- parallel::detectCores()-8
+  ## use the extract function from disagreggation package to extract data from raster stack at polygon level
+  nCores <- parallel::detectCores()-1
   cl <- parallel::makeCluster(nCores)
   doParallel::registerDoParallel(cl)
   print("Extracting data from raster stack, this may take a while...")
   result <- disaggregation::parallelExtract(rstack, data, id="ID",fun=NULL)
   parallel::stopCluster(cl)
 
-  response <- left_join(response, result, by = "ID")
-  return(response)
+  response_df <- left_join(response_df, result, by = "ID")
+  class(response_df) <- append("as_disag", class(response_df))
+  return(response_df)
 
 
 }
@@ -94,17 +136,15 @@ as_disag.SpatialPolygonsDataFrame <- function (data, rstack, response){
 #' @return Nothing at the moment
 #' @method as_disag class
 #' @examples
-#' disag_data <- as_disag(stocks, lags=10, ID="add")
+#' disag_data <- as_disag(data=stocks, lags=10, ID="add")
 
 as_disag.ts <- function(data,lags=10, ID="add",...){
 
 
   if(!(is.ts(data) | is.mts(data)))
      stop("Data object is not of class time-series")
-## below wouldn't work if it was mts.
-  ## Just some formatting, probs a better way of doing this
 
-  data <- as.vector(data2)
+  data <- as.vector(data)
   data <- as.data.frame(data)
   data <- data %>% rename(response=data)
 
@@ -131,6 +171,7 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
   # Wide to long format
   data_long  <- data_lags %>% gather(lag, lagged_growth, all_of(a), factor_key=TRUE)
 
+  class(data_long) <- append("as_disag", class(data_long))
   return(data_long)
 
 }
@@ -154,15 +195,15 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
 #' @param response
 #' @return Nothing at the moment
 #' @examples
-#' disag_data <- disag_from_temporal_dataframe(resp_mortality, lag, ID="add")
+#' disag_data <- as_disag.POSIXt(data=resp_mortality$Datetime, response=resp_mortality, outcome="Death")
 
-as_disag.POSIXt <- function(data = data$Datetime, time_group="%Y%m%d", ID="add",response, outcome="Death"){
+as_disag.POSIXt <- function(data = data$Datetime, time_group="%Y%m%d", ID="add",response_df, outcome="Death"){
 
   if(!(lubridate::is.POSIXt(data) | lubridate::is.Date(data)))
     stop("Data object is not of class date-time")
 
   if(ID=="add"){
-    data2 <- response %>%
+    data2 <- response_df %>%
       mutate(ID=format(Datetime, time_group)) %>%
       group_by(ID) %>%
       mutate(outcome=sum(get(outcome),na.rm=TRUE))
@@ -176,6 +217,7 @@ as_disag.POSIXt <- function(data = data$Datetime, time_group="%Y%m%d", ID="add",
   if(any(df$unique_response > 1))
     stop("Different responses found within the same ID group")
 
+  class(data2) <- append("as_disag", class(data2))
   return(data2)
 
 }
