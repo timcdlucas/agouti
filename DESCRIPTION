@@ -23,7 +23,10 @@ Imports:
     tidyr,
     magrittr,
     rlang,
-    maxLik
+    maxLik,
+    disaggregation,
+    doParallel,
+    lubridate
 Suggests: 
     rmarkdown,
     knitr,
@@ -32,7 +35,7 @@ License: MIT + file LICENSE
 URL: https://github.com/timcdlucas/agouti
 LazyData: true
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
 Depends: 
     R (>= 2.10)
 VignetteBuilder: knitr
