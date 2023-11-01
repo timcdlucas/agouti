@@ -17,6 +17,7 @@ as_disag <- function(data,...){
 #' @export
 #' @param data A dataframe containing a response variable, ID variable and any predictors
 #' @param response The name of the variable containing the response data
+#' @param single_df default is equal TRUE, if more than one dataframe single_df=FALSE
 #' @return \code{as_disag.default} returns a dataframe that can be used with all agouti functions.
 #' @method as_disag default
 #' @export
@@ -36,8 +37,8 @@ as_disag.default <- function(data,response="response", single_df=TRUE){
     stop("ID varible not found in data, please check")
 
   ## check if every row with the same ID has the same response
-  df <- data %>% group_by(ID) %>%
-    mutate(unique_response = n_distinct(responsename))
+  df <- data %>% dplyr::group_by(ID) %>%
+    dplyr::mutate(unique_response = dplyr::n_distinct(responsename))
 
   if(any(df$unique_response > 1))
     stop("Different responses found within the same ID group")
@@ -54,12 +55,13 @@ as_disag.default <- function(data,response="response", single_df=TRUE){
 #' @param data A dataframe containing a outcome variable and ID variable named ID
 #' @param data2 A dataframe containing predictor variables at a different resolution to the outcome but with the same linking ID variable
 #' @param outcome The name of the variable containing the response data
+#' @param single_df default is equal to FALSE
 #' @return \code{as_disag.data.frame} returns a dataframe that can be used with all agouti functions.
 #' @method as_disag data.frame
 #' @export
 #' @examples
 #' disag_data <- as_disag(data=temp_outcome, data2=temp_predictor, outcome="Death")
-as_disag.data.frame <- function (data,data2,outcome,single_df=FALSE,...){
+as_disag.data.frame <- function (data,data2,outcome,single_df=FALSE){
 
   if(!("ID" %in% names(data)))
     stop("ID varible not found in outcome data, please check")
@@ -73,8 +75,8 @@ as_disag.data.frame <- function (data,data2,outcome,single_df=FALSE,...){
   data_summ <- dplyr::left_join(data2, data, by="ID")
 
   ## check if every row with the same ID has the same response
-  df <- data_summ %>% group_by(ID) %>%
-    mutate(unique_response = n_distinct(outcome))
+  df <- data_summ %>% dplyr::group_by(ID) %>%
+    dplyr::mutate(unique_response = dplyr::n_distinct(outcome))
 
   if(any(df$unique_response > 1))
     stop("Different responses found within the same ID group")
@@ -86,7 +88,9 @@ as_disag.data.frame <- function (data,data2,outcome,single_df=FALSE,...){
 
 #' Create a data.frame suitable for disaggregation regression modelling from
 #' a spatial polygons dataframe.
-#'
+#' @importFrom disagreggation parallelExtract
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
 #' @param data A spatial polygons data frame with a column named ID
 #' @param rstack A raster stack of rasters to be summarised at ID level
 #' @param response_df a dataframe containing the response data and an ID variable
@@ -115,7 +119,7 @@ as_disag.SpatialPolygonsDataFrame <- function (data, rstack, response_df){
   result <- disaggregation::parallelExtract(rstack, data, id="ID",fun=NULL)
   parallel::stopCluster(cl)
 
-  response_df <- left_join(response_df, result, by = "ID")
+  response_df <- dplyr::left_join(response_df, result, by = "ID")
   class(response_df) <- append("as_disag", class(response_df))
   return(response_df)
 
@@ -129,7 +133,7 @@ as_disag.SpatialPolygonsDataFrame <- function (data, rstack, response_df){
 #' An example time series object is daily stock price growth
 #'
 #' @section More stuff
-#'
+#' @importFrom stats is.ts is.mts lag
 #' @param data A vector of class time series representing a response e.g. in stock data the growth
 #' @param lags An integer saying how many lags should be taken
 #' @param ID Either the name of the grouping variable or "add" which means an ID variable will be added 1:nrow()
@@ -139,10 +143,10 @@ as_disag.SpatialPolygonsDataFrame <- function (data, rstack, response_df){
 #' @examples
 #' disag_data <- as_disag(data=stock_vector)
 
-as_disag.ts <- function(data,lags=10, ID="add",...){
+as_disag.ts <- function(data,lags=10, ID="add"){
 
 
-  if(!(is.ts(data) | is.mts(data)))
+  if(!(stats::is.ts(data) | stats::is.mts(data)))
      stop("Data object is not of class time-series")
 
   data <- as.vector(data)
@@ -161,8 +165,8 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
 
   # Function for calculating lags
   calculate_lags <- function(df, var, lags){
-    map_lag <- lags %>% map(~partial(lag, n = .x))
-    return(df %>% mutate(across(.cols = {{var}}, .fns = map_lag, .names = "lag{lags}")))
+    map_lag <- lags %>% purr::map(~partial(lag, n = .x))
+    return(df %>% dplyr::mutate(dplyr::across(.cols = {{var}}, .fns = map_lag, .names = "lag{lags}")))
   }
 
   # Create lags - this is in wide format
@@ -170,7 +174,7 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
   # Grab the names of the lag columns so we can go from wide to long
   a <- names(data_lags)[grepl("lag",colnames(data_lags))]
   # Wide to long format
-  data_long  <- data_lags %>% gather(lag, lagged_growth, all_of(a), factor_key=TRUE)
+  data_long  <- data_lags %>% tidyr::gather(lag, lagged_growth, tidyselect::all_of(a), factor_key=TRUE)
 
   class(data_long) <- append("as_disag", class(data_long))
   return(data_long)
@@ -188,7 +192,7 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
 #' occured 2 miliseconds or 4 miliseconds before the health data cutoff time.
 #'
 #' @section More stuff
-#'
+#' @importFrom lubridate is.POSIXt is.Date
 #' @param data a column of a dataframe that is in datetime format
 #' @param time_group what is the format of the datetime variable at the level of the response in date-time format
 #' @param ID Either the name of the grouping variable or "add" which means an ID variable will be added 1:nrow()
@@ -198,7 +202,8 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
 #' @method as_disag POSIXt
 #' @export
 #' @examples
-#' disag_data <- as_disag.POSIXt(data=resp_mortality$Datetime, response=resp_mortality, outcome="Death")
+#' data(mortality_temporal)
+#' disag_data <- as_disag.POSIXt(data=mortality_temporal$Datetime, response=mortality_temporal, outcome="Death")
 
 as_disag.POSIXt <- function(data = data$Datetime, time_group="%Y%m%d", ID="add",response_df, outcome="Death"){
 
@@ -207,15 +212,15 @@ as_disag.POSIXt <- function(data = data$Datetime, time_group="%Y%m%d", ID="add",
 
   if(ID=="add"){
     data2 <- response_df %>%
-      mutate(ID=format(Datetime, time_group)) %>%
-      group_by(ID) %>%
-      mutate(outcome=sum(get(outcome),na.rm=TRUE))
+      dplyr::mutate(ID=format(Datetime, time_group)) %>%
+      dplyr::group_by(ID) %>%
+      dplyr::mutate(outcome=sum(get(outcome),na.rm=TRUE))
 
   }
 
   ## check if every row with the same ID has the same response
-  df <- data2 %>% group_by(ID) %>%
-    mutate(unique_response = n_distinct(outcome))
+  df <- data2 %>% dplyr::group_by(ID) %>%
+    dplyr::mutate(unique_response = n_distinct(outcome))
 
   if(any(df$unique_response > 1))
     stop("Different responses found within the same ID group")
