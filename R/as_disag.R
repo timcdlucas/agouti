@@ -88,7 +88,7 @@ as_disag.data.frame <- function (data,data2,outcome,single_df=FALSE){
 
 #' Create a data.frame suitable for disaggregation regression modelling from
 #' a spatial polygons dataframe.
-#' @importFrom disagreggation parallelExtract
+#' @importFrom disaggregation parallelExtract
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom doParallel registerDoParallel
 #' @param data A spatial polygons data frame with a column named ID
