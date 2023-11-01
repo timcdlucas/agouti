@@ -189,10 +189,11 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
 #'
 #' @section More stuff
 #'
-#' @param data
+#' @param data a column of a dataframe that is in datetime format
 #' @param time_group what is the format of the datetime variable at the level of the response in date-time format
 #' @param ID Either the name of the grouping variable or "add" which means an ID variable will be added 1:nrow()
-#' @param response
+#' @param response_df a dataframe containing at least data,ID and outcome
+#' @param outcome A character string naming the variable which stores the outcome data
 #' @return \code{as_disag.POSIXt} returns a dataframe that can be used with all agouti functions
 #' @method as_disag POSIXt
 #' @export

@@ -3,13 +3,12 @@
 #' by taking quantiles, and then plots these quantiles against the response data.
 #'
 #' @export
-#' @examples
 #' @param formula A formula for the y and x variables.
 #' @param data A data frame suitable for aggregate outputs models.
 #' @param ID The column to use as the group ID column. Unquoted value.
 #' @param weights Which column to use as within group weights such as
 #'   population or time.
-#'
+#' @examples
 #' data(madagascar_malaria)
 #' group_summary_plot(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)
 

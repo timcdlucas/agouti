@@ -1,7 +1,7 @@
 #' A grouped histogram multi plot.
 #'
-#' @importsFrom forcats fct_reorder
-#' @importaFrom ggplot2 aes
+#' @importFrom forcats fct_reorder
+#' @importFrom ggplot2 aes
 #' @param y A character vector of the variable names to be plotted (first variable listed is how the data gets ordered).
 #' @param ID A character or factor vector to be used as a grouping variable.
 #' @param data A dataframe containing the variables to be plotted
@@ -10,7 +10,7 @@
 #' @export
 #' @examples
 #' data(madagascar_malaria)
-#' heat_multi_hist(c("Elevation","EVI","LSTmean), madagascar_malaria$ID, data=madagascar_malaria)
+#' heat_multi_hist(c("Elevation","EVI","LSTmean"), madagascar_malaria$ID, data=madagascar_malaria)
 
 heat_multi_hist <- function(y, ID, data,weights = 1, breaks = 50){
 
