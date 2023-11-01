@@ -25,43 +25,55 @@ as_disag <- function(data,...){
 #' disag_data <- as_disag(data=madagascar_malaria, response="case_rate")
 
 
-as_disag.default <- function(data,response="response", single_df=TRUE){
-
-  responsename <- response
-
-  if(!(responsename %in% names(data)))
-   stop(responsename, " variable not found in data, please check")
-
-
-  if(!("ID" %in% names(data)))
-    stop("ID varible not found in data, please check")
-
-  ## check if every row with the same ID has the same response
-  df <- data %>% dplyr::group_by(.data$ID) %>%
-    dplyr::mutate(unique_response = dplyr::n_distinct(responsename))
-
-  if(any(df$unique_response > 1))
-    stop("Different responses found within the same ID group")
-
-
-  print("Congrats, your data is in as_disag format")
-  class(data) <- append("as_disag", class(data))
-  return(data)
-
-}
+# as_disag.default <- function(data,response="response",single_df=NULL){
+#
+#   responsename <- response
+#
+#   if(!(responsename %in% names(data)))
+#    stop(responsename, " variable not found in data, please check")
+#
+#
+#   if(!("ID" %in% names(data)))
+#     stop("ID varible not found in data, please check")
+#
+#   ## check if every row with the same ID has the same response
+#   df <- data %>% dplyr::group_by(.data$ID) %>%
+#     dplyr::mutate(unique_response = dplyr::n_distinct(responsename))
+#
+#   if(any(df$unique_response > 1))
+#     stop("Different responses found within the same ID group")
+#
+#
+#   print("Congrats, your data is in as_disag format")
+#   class(data) <- append("as_disag", class(data))
+#   return(data)
+#
+# }
 
 #' Checks if a given dataframe is in the correct format for agouti functions
 #'
 #' @param data A dataframe containing a outcome variable and ID variable named ID
-#' @param data2 A dataframe containing predictor variables at a different resolution to the outcome but with the same linking ID variable
+#' @param data2 A dataframe default is NULL in which case we check the data is already in the correct format. If not null,
+#'  the second data frame should contain predictor variables at a different resolution to the outcome but with the same linking ID variable
 #' @param outcome The name of the variable containing the response data
-#' @param single_df default is equal to FALSE
 #' @return \code{as_disag.data.frame} returns a dataframe that can be used with all agouti functions.
 #' @method as_disag data.frame
 #' @export
 #' @examples
 #' disag_data <- as_disag(data=temp_outcome, data2=temp_predictor, outcome="Death")
-as_disag.data.frame <- function (data,data2,outcome,single_df=FALSE){
+as_disag.data.frame <- function (data,data2=NULL,outcome){
+
+  if(is.null(data2)){
+    outcomename <- outcome
+
+    if(!(outcomename %in% names(data)))
+      stop(outcomename, " variable not found in data, please check")
+    if(!("ID" %in% names(data)))
+      stop("ID varible not found in data, please check")
+
+    data_tidy <- data
+
+  }else{
 
   if(!("ID" %in% names(data)))
     stop("ID varible not found in outcome data, please check")
@@ -72,17 +84,18 @@ as_disag.data.frame <- function (data,data2,outcome,single_df=FALSE){
     stop("Some IDs in outcome data are not in predictor data")
 
   ## count how many rows of data we have for each ID. want this to be general in case people have groups of different sizes due to missing data
-  data_summ <- dplyr::left_join(data2, data, by="ID")
+  data_tidy <- dplyr::left_join(data2, data, by="ID")
+  }
 
   ## check if every row with the same ID has the same response
-  df <- data_summ %>% dplyr::group_by(.data$ID) %>%
+  df <- data_tidy %>% dplyr::group_by(.data$ID) %>%
     dplyr::mutate(unique_response = dplyr::n_distinct(outcome))
 
   if(any(df$unique_response > 1))
     stop("Different responses found within the same ID group")
 
-  class(data_summ) <- append("as_disag", class(data_summ))
-  return(data_summ)
+  class(data_tidy) <- append("as_disag", class(data_tidy))
+  return(data_tidy)
 
 }
 
@@ -171,7 +184,7 @@ as_disag.ts <- function(data,lags=10, ID="add"){
   }
 
   # Create lags - this is in wide format
-  data_lags <- data %>% calculate_lags(.data$response, 1:lags)
+  data_lags <- data %>% calculate_lags("response", 1:lags)
   # Grab the names of the lag columns so we can go from wide to long
   a <- names(data_lags)[grepl("lag",colnames(data_lags))]
   # Wide to long format
@@ -203,9 +216,9 @@ as_disag.ts <- function(data,lags=10, ID="add"){
 #' @method as_disag POSIXt
 #' @export
 #' @examples
-#' disag_data <- as_disag.POSIXt(data=mortality_temporal$Datetime, response=mortality_temporal, outcome="Death")
+#' disag_data <- as_disag.POSIXt(data=mortality_temporal$Datetime, response_df=mortality_temporal, outcome="Death")
 
-as_disag.POSIXt <- function(data = data$Datetime, time_group="%Y%m%d", ID="add",response_df, outcome="Death"){
+as_disag.POSIXt <- function(data, time_group="%Y%m%d", ID="add",response_df, outcome="Death"){
 
   if(!(lubridate::is.POSIXt(data) | lubridate::is.Date(data)))
     stop("Data object is not of class date-time")
