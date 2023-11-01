@@ -152,7 +152,7 @@ as_disag.ts <- function(data,lags=10, ID="add"){
 
   data <- as.vector(data)
   data <- as.data.frame(data)
-  data <- data %>% dplyr::rename(.data$response=data)
+  data <- data %>% dplyr::rename(response=data)
 
   ## Adding and checking the ID col
   if(any(ID == "add")){
