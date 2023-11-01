@@ -5,6 +5,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom stats median quantile
 #' @importFrom rlang .data
+#' @importFrom tidyr drop_na
 #' @param x A data frame suitable for use as aggregate output data.
 #' @param ID The column to use as the group ID column. Unquoted value.
 #' @param removeNA default is false, is removeNA is not equal to false, NA's will be dropped
@@ -16,7 +17,7 @@
 agouti_summary <- function(x, ID = ID, removeNA = FALSE){
 
   if(removeNA!=FALSE){
-    x <- x %>% drop_na()
+    x <- x %>% tidyr::drop_na()
   }
 
   ID_char <- deparse(substitute(ID))

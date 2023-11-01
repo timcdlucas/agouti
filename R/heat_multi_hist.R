@@ -38,7 +38,7 @@ heat_multi_hist <- function(y, ID, data,weights = 1, breaks = 50){
     return(p1)
   }
   else if(z!=1){
-    dd <- tidyr::pivot_longer(data=d,cols=all_of(y))
+    dd <- tidyr::pivot_longer(data=d,cols=tidyselect::all_of(y))
     bins <- diff(range(d$x[!(is.na(d$x))]))
     p1 <-
       ggplot2::ggplot(dd, ggplot2::aes(x = value, y = ID, weights = weights)) +

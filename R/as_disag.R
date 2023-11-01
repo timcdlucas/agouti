@@ -37,7 +37,7 @@ as_disag.default <- function(data,response="response", single_df=TRUE){
     stop("ID varible not found in data, please check")
 
   ## check if every row with the same ID has the same response
-  df <- data %>% dplyr::group_by(ID) %>%
+  df <- data %>% dplyr::group_by(.data$ID) %>%
     dplyr::mutate(unique_response = dplyr::n_distinct(responsename))
 
   if(any(df$unique_response > 1))
@@ -75,7 +75,7 @@ as_disag.data.frame <- function (data,data2,outcome,single_df=FALSE){
   data_summ <- dplyr::left_join(data2, data, by="ID")
 
   ## check if every row with the same ID has the same response
-  df <- data_summ %>% dplyr::group_by(ID) %>%
+  df <- data_summ %>% dplyr::group_by(.data$ID) %>%
     dplyr::mutate(unique_response = dplyr::n_distinct(outcome))
 
   if(any(df$unique_response > 1))
@@ -141,6 +141,7 @@ as_disag.SpatialPolygonsDataFrame <- function (data, rstack, response_df){
 #' @method as_disag ts
 #' @export
 #' @examples
+#' data(stock_vector)
 #' disag_data <- as_disag(data=stock_vector)
 
 as_disag.ts <- function(data,lags=10, ID="add"){
@@ -151,7 +152,7 @@ as_disag.ts <- function(data,lags=10, ID="add"){
 
   data <- as.vector(data)
   data <- as.data.frame(data)
-  data <- data %>% dplyr::rename(response=data)
+  data <- data %>% dplyr::rename(.data$response=data)
 
   ## Adding and checking the ID col
   if(any(ID == "add")){
@@ -170,7 +171,7 @@ as_disag.ts <- function(data,lags=10, ID="add"){
   }
 
   # Create lags - this is in wide format
-  data_lags <- data %>% calculate_lags(response, 1:lags)
+  data_lags <- data %>% calculate_lags(.data$response, 1:lags)
   # Grab the names of the lag columns so we can go from wide to long
   a <- names(data_lags)[grepl("lag",colnames(data_lags))]
   # Wide to long format
@@ -202,7 +203,6 @@ as_disag.ts <- function(data,lags=10, ID="add"){
 #' @method as_disag POSIXt
 #' @export
 #' @examples
-#' data(mortality_temporal)
 #' disag_data <- as_disag.POSIXt(data=mortality_temporal$Datetime, response=mortality_temporal, outcome="Death")
 
 as_disag.POSIXt <- function(data = data$Datetime, time_group="%Y%m%d", ID="add",response_df, outcome="Death"){
@@ -212,15 +212,15 @@ as_disag.POSIXt <- function(data = data$Datetime, time_group="%Y%m%d", ID="add",
 
   if(ID=="add"){
     data2 <- response_df %>%
-      dplyr::mutate(ID=format(Datetime, time_group)) %>%
-      dplyr::group_by(ID) %>%
+      dplyr::mutate(ID=format(.data$Datetime, time_group)) %>%
+      dplyr::group_by(.data$ID) %>%
       dplyr::mutate(outcome=sum(get(outcome),na.rm=TRUE))
 
   }
 
   ## check if every row with the same ID has the same response
-  df <- data2 %>% dplyr::group_by(ID) %>%
-    dplyr::mutate(unique_response = n_distinct(outcome))
+  df <- data2 %>% dplyr::group_by(.data$ID) %>%
+    dplyr::mutate(unique_response = dplyr::n_distinct(outcome))
 
   if(any(df$unique_response > 1))
     stop("Different responses found within the same ID group")

@@ -26,7 +26,7 @@ group_summary_plot <- function(formula, data, ID = ID, weights = weights){
     }
 
     ## for handling NAs
-    data <- data %>% drop_na()
+    data <- data %>% dplyr::drop_na()
 
     p1 <-
     data %>%
