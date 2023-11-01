@@ -19,6 +19,7 @@ as_disag <- function(data,...){
 #' @param response The name of the variable containing the response data
 #' @return \code{as_disag.default} returns a dataframe that can be used with all agouti functions.
 #' @method as_disag default
+#' @export
 #' @examples
 #' disag_data <- as_disag(data=madagascar_malaria, response="case_rate")
 
@@ -50,12 +51,12 @@ as_disag.default <- function(data,response="response", single_df=TRUE){
 
 #' Checks if a given dataframe is in the correct format for agouti functions
 #'
-#' @export
 #' @param data A dataframe containing a outcome variable and ID variable named ID
 #' @param data2 A dataframe containing predictor variables at a different resolution to the outcome but with the same linking ID variable
 #' @param outcome The name of the variable containing the response data
 #' @return \code{as_disag.data.frame} returns a dataframe that can be used with all agouti functions.
 #' @method as_disag data.frame
+#' @export
 #' @examples
 #' disag_data <- as_disag(data=temp_outcome, data2=temp_predictor, outcome="Death")
 as_disag.data.frame <- function (data,data2,outcome,single_df=FALSE,...){
@@ -86,12 +87,12 @@ as_disag.data.frame <- function (data,data2,outcome,single_df=FALSE,...){
 #' Create a data.frame suitable for disaggregation regression modelling from
 #' a spatial polygons dataframe.
 #'
-#' @export
 #' @param data A spatial polygons data frame with a column named ID
 #' @param rstack A raster stack of rasters to be summarised at ID level
 #' @param response_df a dataframe containing the response data and an ID variable
 #' @return \code{as_disag.SpatialPolygonsDataFrame} returns a dataframe that can be used with all agouti functions.
 #' @method as_disag SpatialPolygonsDataFrame
+#' @export
 #' @examples
 #' disag_data <- as_disag(data=shapefile, rstack=rstack, response=wnv)
 
@@ -129,14 +130,14 @@ as_disag.SpatialPolygonsDataFrame <- function (data, rstack, response_df){
 #'
 #' @section More stuff
 #'
-#' @export
 #' @param data A vector of class time series representing a response e.g. in stock data the growth
 #' @param lags An integer saying how many lags should be taken
 #' @param ID Either the name of the grouping variable or "add" which means an ID variable will be added 1:nrow()
-#' @return Nothing at the moment
-#' @method as_disag class
+#' @return \code{as_disag.ts} returns a dataframe that can be used with all agouti functions.
+#' @method as_disag ts
+#' @export
 #' @examples
-#' disag_data <- as_disag(data=stocks, lags=10, ID="add")
+#' disag_data <- as_disag(data=stock_vector)
 
 as_disag.ts <- function(data,lags=10, ID="add",...){
 
@@ -146,7 +147,7 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
 
   data <- as.vector(data)
   data <- as.data.frame(data)
-  data <- data %>% rename(response=data)
+  data <- data %>% dplyr::rename(response=data)
 
   ## Adding and checking the ID col
   if(any(ID == "add")){
@@ -188,12 +189,13 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
 #'
 #' @section More stuff
 #'
-#' @export
 #' @param data
 #' @param time_group what is the format of the datetime variable at the level of the response in date-time format
 #' @param ID Either the name of the grouping variable or "add" which means an ID variable will be added 1:nrow()
 #' @param response
-#' @return Nothing at the moment
+#' @return \code{as_disag.POSIXt} returns a dataframe that can be used with all agouti functions
+#' @method as_disag POSIXt
+#' @export
 #' @examples
 #' disag_data <- as_disag.POSIXt(data=resp_mortality$Datetime, response=resp_mortality, outcome="Death")
 
