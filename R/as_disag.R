@@ -14,17 +14,6 @@ as_disag <- function(data,...){
 
 #' Checks if a given dataframe is in the correct format for agouti functions
 #'
-#' @export
-#' @param data A dataframe containing a response variable, ID variable and any predictors
-#' @param response The name of the variable containing the response data
-#' @param single_df default is equal TRUE, if more than one dataframe single_df=FALSE
-#' @return \code{as_disag.default} returns a dataframe that can be used with all agouti functions.
-#' @method as_disag default
-#' @export
-#' @examples
-#' disag_data <- as_disag(data=madagascar_malaria, response="case_rate")
-
-
 # as_disag.default <- function(data,response="response",single_df=NULL){
 #
 #   responsename <- response
