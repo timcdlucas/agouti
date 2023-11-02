@@ -164,7 +164,7 @@ as_disag.ts <- function(data,lags=10, ID="add"){
      stop("Data object is not of class time-series")
 
   data_ts <- as.data.frame(as.numeric(data))
-  names(data_ts)[1] <- "x"
+  names(data_ts)[1] <- "response"
 
   ## Adding and checking the ID col
   if(any(ID == "add")){
@@ -183,7 +183,7 @@ as_disag.ts <- function(data,lags=10, ID="add"){
   }
 
   # Create lags - this is in wide format
-  data_lags <- data_ts %>% calculate_lags("x", 1:lags)
+  data_lags <- data_ts %>% calculate_lags("response", 1:lags)
   # Grab the names of the lag columns so we can go from wide to long
   a <- names(data_lags)[grepl("lag",colnames(data_lags))]
   # Wide to long format
