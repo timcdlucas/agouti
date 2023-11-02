@@ -167,7 +167,7 @@ as_disag.ts <- function(data,lags=10, ID="add"){
 
   # Function for calculating lags
   calculate_lags <- function(df, var, lags){
-    map_lag <- lags %>% purrr::map(~partial(lag, n = .x))
+    map_lag <- lags %>% purrr::map(~purrr::partial(lag, n = .x))
     return(df %>% mutate(across(.cols = {{var}}, .fns = map_lag, .names = "lag{lags}")))
   }
 
