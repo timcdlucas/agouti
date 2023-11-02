@@ -163,28 +163,27 @@ as_disag.ts <- function(data,lags=10, ID="add"){
   if(!(stats::is.ts(data) | stats::is.mts(data)))
      stop("Data object is not of class time-series")
 
-  data <- as.vector(data)
-  data <- as.data.frame(data)
-  data <- data %>% dplyr::rename(response=data)
+  data_ts <- as.data.frame(as.numeric(data))
+  names(data_ts)[1] <- "x"
 
   ## Adding and checking the ID col
   if(any(ID == "add")){
-    data <- cbind(data,ID=1:length(data))
+    data_ts <- cbind(data_ts,ID=1:nrow(data_ts))
     print("adding ID col")
   }else {
-    data <- cbind(data, ID)
-    if(nrow(data) != length(unique(data$ID)))
+    data_ts <- cbind(data, ID)
+    if(nrow(data_ts) != length(unique(data_ts$ID)))
       stop("Error: There is not a unique ID for each observation, check your ID column")
   }
 
   # Function for calculating lags
   calculate_lags <- function(df, var, lags){
     map_lag <- lags %>% purrr::map(~partial(lag, n = .x))
-    return(df %>% dplyr::mutate(dplyr::across(.cols = {{var}}, .fns = map_lag, .names = "lag{lags}")))
+    return(df %>% mutate(across(.cols = {{var}}, .fns = map_lag, .names = "lag{lags}")))
   }
 
   # Create lags - this is in wide format
-  data_lags <- data %>% calculate_lags("response", 1:lags)
+  data_lags <- data_ts %>% calculate_lags("x", 1:lags)
   # Grab the names of the lag columns so we can go from wide to long
   a <- names(data_lags)[grepl("lag",colnames(data_lags))]
   # Wide to long format
