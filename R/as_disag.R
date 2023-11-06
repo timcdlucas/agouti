@@ -8,6 +8,7 @@
 ## all other functions in this package?
 
 # Do we also want to force them to provide an ID col?
+#' @export
 as_disag <- function(data,...){
   UseMethod("as_disag")
 }
@@ -168,7 +169,7 @@ as_disag.ts <- function(data,lags=10, ID="add"){
   # Function for calculating lags
   calculate_lags <- function(df, var, lags){
     map_lag <- lags %>% purrr::map(~purrr::partial(lag, n = .x))
-    return(df %>% mutate(across(.cols = {{var}}, .fns = map_lag, .names = "lag{lags}")))
+    return(df %>% dplyr::mutate(dplyr::across(.cols = {{var}}, .fns = map_lag, .names = "lag{lags}")))
   }
 
   # Create lags - this is in wide format
@@ -204,6 +205,7 @@ as_disag.ts <- function(data,lags=10, ID="add"){
 #' @method as_disag POSIXt
 #' @export
 #' @examples
+#' data(mortality_temporal)
 #' disag_data <- as_disag.POSIXt(data=mortality_temporal$Datetime, response_df=mortality_temporal, outcome="Death")
 
 as_disag.POSIXt <- function(data, time_group="%Y%m%d", ID="add",response_df, outcome="Death"){
