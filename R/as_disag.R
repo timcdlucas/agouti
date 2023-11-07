@@ -1,13 +1,6 @@
 
-# can't remember how to define methods
-
-## do i want data to be an object that contains at a minimum response and
-## ID. - yes? response could be stock growth, number of malaria cases etc.
-## this could also contain predictors but doesn't have to.
-## output is a dataframe of class as_disag which can be used with all
-## all other functions in this package?
-
-# Do we also want to force them to provide an ID col?
+#' @param data A dataframe containing at least an outcome variable and ID variable named ID
+#' @param ... any other arguments
 #' @method as_disag
 #' @export
 as_disag <- function(data,...){
@@ -47,11 +40,16 @@ as_disag <- function(data,...){
 #' @param data2 A dataframe default is NULL in which case we check the data is already in the correct format. If not null,
 #'  the second data frame should contain predictor variables at a different resolution to the outcome but with the same linking ID variable
 #' @param outcome The name of the variable containing the response data
+#' @param ... any other arguments
 #' @return \code{as_disag.data.frame} returns a dataframe that can be used with all agouti functions.
 #' @method as_disag data.frame
 #' @export
 #' @examples
+#' \dontrun{
 #' disag_data <- as_disag(data=temp_outcome, data2=temp_predictor, outcome="Death")
+#' }
+#' data(madagascar_malaria)
+#' disag_data <- as_disag(data=madagascar_malaria,outcome="case_rate")
 as_disag.data.frame <- function (data,data2=NULL,outcome,...){
 
   if(is.null(data2)){
@@ -98,6 +96,7 @@ as_disag.data.frame <- function (data,data2=NULL,outcome,...){
 #' @param data A spatial polygons data frame with a column named ID
 #' @param rstack A raster stack of rasters to be summarised at ID level
 #' @param response_df a dataframe containing the response data and an ID variable
+#' @param ... any other arguments
 #' @return \code{as_disag.SpatialPolygonsDataFrame} returns a dataframe that can be used with all agouti functions.
 #' @method as_disag SpatialPolygonsDataFrame
 #' @export
@@ -142,6 +141,7 @@ as_disag.SpatialPolygonsDataFrame <- function (data, rstack, response_df,...){
 #' @param data A vector of class time series representing a response e.g. in stock data the growth
 #' @param lags An integer saying how many lags should be taken
 #' @param ID Either the name of the grouping variable or "add" which means an ID variable will be added 1:nrow()
+#' @param ... any other arguments
 #' @return \code{as_disag.ts} returns a dataframe that can be used with all agouti functions.
 #' @method as_disag ts
 #' @export
@@ -204,6 +204,7 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
 #' @param ID Either the name of the grouping variable or "add" which means an ID variable will be added 1:nrow()
 #' @param response_df a dataframe containing at least data,ID and outcome
 #' @param outcome A character string naming the variable which stores the outcome data
+#' @param ... any other arguments
 #' @return \code{as_disag.POSIXt} returns a dataframe that can be used with all agouti functions
 #' @method as_disag POSIXt
 #' @export
