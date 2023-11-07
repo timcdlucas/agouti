@@ -8,6 +8,7 @@
 ## all other functions in this package?
 
 # Do we also want to force them to provide an ID col?
+#' @method as_disag
 #' @export
 as_disag <- function(data,...){
   UseMethod("as_disag")
@@ -51,7 +52,7 @@ as_disag <- function(data,...){
 #' @export
 #' @examples
 #' disag_data <- as_disag(data=temp_outcome, data2=temp_predictor, outcome="Death")
-as_disag.data.frame <- function (data,data2=NULL,outcome){
+as_disag.data.frame <- function (data,data2=NULL,outcome,...){
 
   if(is.null(data2)){
     outcomename <- outcome
@@ -103,7 +104,7 @@ as_disag.data.frame <- function (data,data2=NULL,outcome){
 #' @examples
 #' disag_data <- as_disag(data=shapefile, rstack=rstack, response=wnv)
 
-as_disag.SpatialPolygonsDataFrame <- function (data, rstack, response_df){
+as_disag.SpatialPolygonsDataFrame <- function (data, rstack, response_df,...){
 
   ## first need some checks on each of the objects
   if(!("ID" %in% names(data@data)))
@@ -147,7 +148,7 @@ as_disag.SpatialPolygonsDataFrame <- function (data, rstack, response_df){
 #' data(stock_vector)
 #' disag_data <- as_disag(data=stock_vector)
 
-as_disag.ts <- function(data,lags=10, ID="add"){
+as_disag.ts <- function(data,lags=10, ID="add",...){
 
 
   if(!(stats::is.ts(data) | stats::is.mts(data)))
@@ -209,7 +210,7 @@ as_disag.ts <- function(data,lags=10, ID="add"){
 #' data(mortality_temporal)
 #' disag_data <- as_disag.POSIXt(data=mortality_temporal$Datetime, response_df=mortality_temporal, outcome="Death")
 
-as_disag.POSIXt <- function(data, time_group="%Y%m%d", ID="add",response_df, outcome="Death"){
+as_disag.POSIXt <- function(data, time_group="%Y%m%d", ID="add",response_df, outcome="Death",...){
 
   if(!(lubridate::is.POSIXt(data) | lubridate::is.Date(data)))
     stop("Data object is not of class date-time")
