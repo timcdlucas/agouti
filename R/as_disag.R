@@ -102,8 +102,9 @@ as_disag.data.frame <- function (data,data2=NULL,outcome,...){
 #' @method as_disag SpatialPolygonsDataFrame
 #' @export
 #' @examples
+#' \dontrun{
 #' disag_data <- as_disag(data=shapefile, rstack=rstack, response=wnv)
-
+#' }
 as_disag.SpatialPolygonsDataFrame <- function (data, rstack, response_df,...){
 
   ## first need some checks on each of the objects
