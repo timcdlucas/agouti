@@ -1,7 +1,9 @@
 
+#' as_dsiag Generic function
+#'
 #' @param data A dataframe containing at least an outcome variable and ID variable named ID
 #' @param ... any other arguments
-#' @method as_disag
+#' @method
 #' @export
 as_disag <- function(data,...){
   UseMethod("as_disag")
@@ -156,7 +158,7 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
      stop("Data object is not of class time-series")
 
   data_ts <- as.data.frame(as.numeric(data))
-  names(data_ts)[1] <- "response"
+  names(data_ts)[1] <- "outcome"
 
   ## Adding and checking the ID col
   if(any(ID == "add")){
@@ -170,17 +172,17 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
 
   # Function for calculating lags
   calculate_lags <- function(df, var, lags){
-    map_lag <- lags %>% purrr::map(~purrr::partial(lag, n = .x))
+    map_lag <- lags %>% purrr::map(~purrr::partial(dplyr::lag, n = .x))
     return(df %>% dplyr::mutate(dplyr::across(.cols = {{var}}, .fns = map_lag, .names = "lag{lags}")))
   }
 
   # Create lags - this is in wide format
-  data_lags <- data_ts %>% calculate_lags("response", 1:lags)
-  data_lags <- cbind(data_lags, data_ts)
+  data_lags <- data_ts %>% calculate_lags("outcome", 1:lags)
+  #data_lags <- cbind(data_lags, data_ts)
   # Grab the names of the lag columns so we can go from wide to long
   a <- names(data_lags)[grepl("lag",colnames(data_lags))]
   # Wide to long format
-  data_long  <- data_lags %>% tidyr::gather(lag, lagged_growth, tidyselect::all_of(a), factor_key=TRUE)
+  data_long  <- data_lags %>% tidyr::gather(lag, outcome, tidyselect::all_of(a), factor_key=TRUE)
 
   class(data_long) <- append("as_disag", class(data_long))
   return(data_long)
