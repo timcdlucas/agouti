@@ -182,7 +182,7 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
   # Grab the names of the lag columns so we can go from wide to long
   a <- names(data_lags)[grepl("lag",colnames(data_lags))]
   # Wide to long format
-  data_long  <- data_lags %>% tidyr::gather(lag, covariate, tidyselect::all_of(a), factor_key=TRUE)
+  data_long  <- data_lags %>% tidyr::gather(lag, "covariate", tidyselect::all_of(a), factor_key=TRUE)
 
   class(data_long) <- append("as_disag", class(data_long))
   return(data_long)
@@ -212,7 +212,8 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
 #' @export
 #' @examples
 #' data(mortality_temporal)
-#' disag_data <- as_disag(data=mortality_temporal$Datetime, response_df=mortality_temporal, outcome="Death")
+#' disag_data <- as_disag(data=mortality_temporal$Datetime,
+#' response_df=mortality_temporal, outcome="Death")
 
 as_disag.POSIXt <- function(data, time_group="%Y%m%d", ID="add",response_df, outcome="Death",...){
 

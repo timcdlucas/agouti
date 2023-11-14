@@ -14,9 +14,7 @@ Description: Disaggregation regression, or learning from aggregate outputs, has
 	structure, and link functions) while leaving the specific models for add
 	on packages.
 Imports:
-    grDevices,
     stats,
-    graphics,
     ggplot2,
     forcats,
     dplyr,
@@ -26,7 +24,9 @@ Imports:
     maxLik,
     disaggregation,
     doParallel,
-    lubridate
+    lubridate,
+    purrr,
+    tidyselect
 Suggests: 
     rmarkdown,
     knitr,
