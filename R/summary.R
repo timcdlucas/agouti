@@ -36,7 +36,7 @@ agouti_summary <- function(x, ID = ID, high_res=NA, removeNA = FALSE){
     unique_vals <-
       x %>%
       sapply(function(col) length(unique(col)))
-    not_agg_level <- which(!(unique_vals == n_groups))
+    not_agg_level <- which(!(unique_vals <= n_groups))
   }else {
 
     if(!all(high_res %in% names(x)))
@@ -45,13 +45,15 @@ agouti_summary <- function(x, ID = ID, high_res=NA, removeNA = FALSE){
     not_agg_level <- as.numeric(which(names(x) %in% high_res))
   }
 
-  if(length(not_agg_level) == 1){
+  number_vars <- x %>% dplyr::select(dplyr::any_of(not_agg_level)) %>% dplyr::select_if(is.numeric)
+  #if(length(not_agg_level) == 1){
+  if(ncol(number_vars) == 2){
 
-    col_name <- names(x)[not_agg_level]
+    col_name <- names(number_vars)[names(number_vars) != "ID"]
     group_summary_table <-
-      x %>%
+      number_vars %>%
       dplyr::group_by({{ID}}) %>%
-      dplyr::select(dplyr::any_of(not_agg_level)) %>%
+      dplyr::select(dplyr::any_of(col_name)) %>%
       dplyr::select_if(is.numeric) %>%
       dplyr::summarise(across(c(all_of(col_name)), list(median=median,min=min,max=max))) %>%
       dplyr::ungroup() %>%
