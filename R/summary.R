@@ -23,6 +23,8 @@ agouti_summary <- function(x, ID = ID, high_res=NA, removeNA = FALSE){
   }
 
   ID_char <- deparse(substitute(ID))
+  if(!(ID_char %in% names(x)))
+    stop(paste0("Data does not contain the variable called ", ID_char))
 
   n_groups <- length(unique(x[, ID_char, drop = TRUE]))
   n_rows <- nrow(x)
