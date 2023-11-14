@@ -37,6 +37,9 @@ agouti_summary <- function(x, ID = ID, high_res=NA, removeNA = FALSE){
       x %>%
       sapply(function(col) length(unique(col)))
     not_agg_level <- which(!(unique_vals <= n_groups))
+    if(length(not_agg_level)==0)
+      stop("Not clear which variables are high resolution, please specify with the argument high_res")
+
   }else {
 
     if(!all(high_res %in% names(x)))
@@ -45,9 +48,9 @@ agouti_summary <- function(x, ID = ID, high_res=NA, removeNA = FALSE){
     not_agg_level <- as.numeric(which(names(x) %in% high_res))
   }
 
-  number_vars <- x %>% dplyr::select(dplyr::any_of(not_agg_level)) %>% dplyr::select_if(is.numeric)
+  number_vars <- x %>% dplyr::group_by({{ID}}) %>% dplyr::select(dplyr::any_of(not_agg_level)) %>% dplyr::select_if(is.numeric)
   #if(length(not_agg_level) == 1){
-  if(ncol(number_vars) == 2){
+  if(ncol(number_vars) == 2 | length(high_res) == 1){
 
     col_name <- names(number_vars)[names(number_vars) != "ID"]
     group_summary_table <-
