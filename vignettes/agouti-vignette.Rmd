@@ -1,0 +1,481 @@
+---
+title: "AGOUti"
+output:
+   rmarkdown::html_vignette:
+     toc: true
+     toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{AGOUti}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width=8, fig.height = 6
+)
+```
+
+# Introduction
+
+This vignette describes the use of the agouti R package, a generic R
+package for multi-resolution data. The goal is to improve the usability
+of multi-resolution data in statistical analyses
+
+Multi-resolution data is also referred to as mixed frequency and mis-aligned data. Examples of multi-resolution data can be found in various fields including epidemiology and econometrics. The key characteristic of any multi-resolution data, is that the outcome variable/s are at a lower resolution to predictor/s or covariate/s. 
+
+Examples of multi-resoltion data are an outcome of daily deaths of respiratory disease and covariates are recorded hourly. Similarly, an outcome may be deaths in
+a country but the covariates are at 5kmx5km resolution. Another, less intuitive example of multi-resolution data is that of a series of lagged variables. For example, daily growth in stock prices, the main covariate is the lagged growth rate. Instead of treating each considered lag as separate variables they can be treated as a single variable where one outcome, stock growth on day X, has Y lags associated.
+
+Currently, users of multi-resolution data have to seek out separate R packages for each use
+case for example, with spatial data you could use the *disaggregation* package, for econometric data there is *MIDAS* and for time-series data with lags there is *dlnm*. AGOUti does not replace these packages but rather is a generalised package that can help users with any type of multi-resolution data in the preliminary stages of analyses. AGOUti provides generic functions for multi-resolution data that help format, summarise, visualise and carry out simple exploratory analyses.
+
+There are four important features of this package, the first is formatting. The function *`as_disag()`* takes multi-resolution data in whatever format and makes it of class *as_disag*. The second feature is to summarise, *`agouti_summary()`* takes an object of class
+*as_disag* and provides a summary of all high-resolution variables. Visualization is the third feature. AGOUti provides multiple plotting functions to investigate high-resolution covariates against a low-resolution response. The final feature is to run some simple analyses.
+
+This vignette will show how the agouti R package can work for four
+different examples of multi-resolution data each starting with different
+data structures:
+
+1.  You think you have a single tidy dataframe
+2.  2 dataframes. 1 containing the outcome data and another containing covariates
+3.  Temporal data
+4.  Timeseries data and you want a lagged covariate
+5.  Spatial data including shapefiles and rasters
+
+```{r setup, echo=FALSE}
+devtools::load_all()
+#library(agouti)
+# madagascar_malaria <- read.csv("C:/Users/SuzanneKeddie/OneDrive - London School of Hygiene and Tropical Medicine/Leicester/mdg_malaria.csv")
+df_outcome <- read.csv("C:/Users/SuzanneKeddie/OneDrive - London School of Hygiene and Tropical Medicine/Leicester/df_outcome.csv")
+df_covariate <- read.csv("C:/Users/SuzanneKeddie/OneDrive - London School of Hygiene and Tropical Medicine/Leicester/df_covaraite.csv")
+```
+
+## Example 1: You think you have a single tidy dataframe
+
+In this example, you think your data is already tidy. You have your high resolution covariate/s, low resolution outcome and an ID variable linking high and low resolutuion data in a single dataframe. For every
+covariate with the same ID there is the same outcome value. 
+
+An example, dataset in this format is provided with AGOUti.
+The madagascar_malaria data has low resolution outcome variables of cases and case rate of malaria in
+different districts of Madagascar:
+
+```{r}
+knitr::kable(head(madagascar_malaria), digits=2)
+```
+
+This dataset contains the following variables:
+
+-   `ID` an identifying value that is at the level of the response
+-   `cellid` related to the resolution of the predictors, this id varies
+    within ID
+-   `cases` and `case_rate` these are our outcome variables and within
+    the same ID all outcome values are the same. i.e. in district
+    1010918 there were 1827.16 cases of malaria
+-   `pop` population size at the resolution of cellid
+-   `agg_pop` population aggregated to the resolution of ID
+-   `Elevation`:`LSTmean` predictor variables (Elevation, Enhanced
+    vegetation index and Land surface temperature mean)
+-   `longitude`:`latitude` other spatial identifying information
+
+### Format
+
+To check if this is in the correct format and to convert it to the correct format if not, we use the function `as_disag()`
+
+```{r}
+data("madagascar_malaria")
+disag_data <- agouti::as_disag(madagascar_malaria, outcome="case_rate")
+class(madagascar_malaria)
+class(disag_data)
+knitr::kable(head(disag_data), digits=2)
+```
+
+In this example, the data was already in the correct format so the returned object 
+disag_data is in the same format as madagascar_malaria but the class of
+the resulting dataframe has changed.
+
+Now we have an object of class `as_disag` we can summarise, plot and run
+a simple analysis.
+
+### Summarise
+
+Using the function `agouti_summary()` we can easily summarise the
+variables that are at a higher resolution than the outcome.
+
+```{r}
+agouti::agouti_summary(disag_data)
+```
+
+This summary shows the number of rows in our dataset. This represents
+the resolution of the predictor variables. These predictor variables
+fall within 109 *groups* delineated the ID variable. There are a range
+of group sizes from a group with only a single row of predictor/s to a
+group with 867 rows of predictor variable/s
+
+The default in this function summarises all variables that are not aggregated, calculated
+the median within each group and then presents the median of these
+medians. Alternatively you can specify which variables to summarise with the argument *high_res*. For example, to summarise just the population and EVI variables:
+
+```{r}
+agouti::agouti_summary(disag_data, high_res=c("pop","EVI"))
+```
+
+
+### Visualise
+
+#### 1) `heat_hist()`
+
+First of all we might be interested to look at some of our predictor
+variables. The function `heat_hist()` plots a histogram grouped by ID on
+the y axis ordered by the median predictor (x) within each group.
+
+Here we look in turn at each of the climatic predictor variables in the
+madagascar_malaria dataset
+
+::: {style="margin-bottom:50px;"}
+```{r}
+agouti::heat_hist(disag_data$Elevation, disag_data$ID)+ ggplot2::ggtitle("Elevation")
+agouti::heat_hist(disag_data$EVI, disag_data$ID)+ ggplot2::ggtitle("EVI")
+agouti::heat_hist(disag_data$LSTmean, disag_data$ID)+ ggplot2::ggtitle("LSTmean")
+```
+:::
+
+#### 2) `group_summary_plot()`
+
+With heat_hist we looked at the predictors in isolation but we might
+want to visulaise the predictors against the response.
+`group_summary_plot()` summarises the predictors by quantile and then
+plots these quantiles against the response data.
+
+::: {style="margin-bottom:50px;"}
+```{r}
+agouti::group_summary_plot(case_rate ~ LSTmean, data = disag_data, ID = ID, weights = pop)
+```
+:::
+
+#### 3) `thresh_sm()`
+
+An alternative way of visualising the predictors and response is via the
+function `thresh_sm()`. The plot is created by calculating, within each
+group, the proportion of observations that are above a threshold. A
+scatter plot with a linear model is plotted of the relationship between
+this proportion and the aggregated output. The threshold is varied and
+small multiples of the different values are plotted. The number of
+multiples can be selected by the argument *small_mult*, the default is
+six.
+
+::: {style="margin-bottom:50px;"}
+```{r}
+agouti::thresh_sm(case_rate ~ LSTmean, data = disag_data, ID = ID, weights = pop, small_mult=6)
+```
+:::
+
+#### 4) `link_plot()`
+
+The final plotting function available is `link_plot()`. This is a
+scatter plot with data from the aggregate unit "linked" by a line and
+colour coded to match.
+
+::: {style="margin-bottom:50px;"}
+```{r}
+agouti::link_plot(case_rate ~ LSTmean, data = disag_data, ID = ID, weights = pop)
+```
+:::
+
+### Model
+
+## Example 2: 2 dataframes, 1 for low-resolution outcome, 1 for high-resolution/covariates
+
+In this example, the low-resolution outcome data is in one dataframe and the covariates which may or may not be high resolution, are in another dataframe. Both dataframes must contain an ID variable that links the high resolution and low resolution data
+
+```{r}
+knitr::kable(head(df_outcome), digits=2)
+knitr::kable(head(df_covariate), digits=2)
+
+```
+The outcome data are daily deaths and the covariate is hourly Temperature recordings. Both datasets contain a variable called *ID* derived from the Date/Datetime variables.
+
+### Format
+These datasets can be transformed to the required format using the
+`as_disag()` function as follows:
+
+```{r}
+disag_data <- agouti::as_disag(data=df_outcome, data2=df_covariate, outcome="Death")
+class(disag_data)
+knitr::kable(head(disag_data), digits=2)
+```
+
+Formatting these data returns a single dataframe of class *as_disag*. The outcome variable death is repeated for all observations within the same ID group.
+
+### Summarise
+
+Using the function `agouti_summary()` we can summarise the variable/s
+that are at a higher resolution than the outcome.
+
+```{r}
+agouti::agouti_summary(disag_data)
+```
+
+This summary shows the number of rows in our dataset. This represents
+the resolution of the predictor variables. These predictor variables
+fall within 4018 groups delineated the ID variable. In this dataset all
+groups are exactly the same size as we are dealing with hours in a day
+and there is no missing data.
+
+The table summarises all variables that are not aggregated (*Temp*), calculated
+the median within each group and then presents the median of these
+medians.
+
+### Visualise
+
+#### 1) `heat_hist()`
+
+This dataset contains only a single predictor. The function
+`heat_hist()` plots a histogram grouped by ID on the y axis ordered by
+the median predictor (x) within each group.
+
+::: {style="margin-bottom:50px;"}
+```{r}
+agouti::heat_hist(disag_data$Temp, disag_data$ID)+ ggplot2::ggtitle("Temp")
+```
+:::
+
+#### 2) `group_summary_plot()`
+
+To plot the predictor against the response we can use
+`group_summary_plot()`. This summarises the predictor/s by quantile and
+then plots these quantiles against the response data.
+
+::: {style="margin-bottom:50px;"}
+```{r}
+agouti::group_summary_plot(Death ~ Temp, data = disag_data, ID = ID)
+```
+:::
+
+#### 3) `thresh_sm()`
+
+An alternative way of visualising the predictors and response is via the
+function `thresh_sm()`. The plot is created by calculating, within each
+group, the proportion of observations that are above a threshold. A
+scatter plot with a linear model is plotted of the relationship between
+this proportion and the aggregated output. The threshold is varied and
+small multiples of the different values are plotted. The number of
+multiples can be selected by the argument *small_mult*, the default is
+six.
+
+::: {style="margin-bottom:50px;"}
+```{r}
+agouti::thresh_sm(Death ~ Temp, data = disag_data, ID = ID, small_mult=6)
+```
+:::
+
+#### 4) `link_plot()`
+
+The final plotting function available is `link_plot()`. This is a
+scatter plot with data from the aggregate unit "linked" by a line and
+colour coded to match.
+
+::: {style="margin-bottom:50px;"}
+```{r}
+agouti::link_plot(Death ~ Temp, data = disag_data, ID = ID, weights = 1)
+```
+:::
+
+### Model
+
+## Example 3: Temporal (possible don't use this one?)
+
+In this example, your data is temporal (i.e. each outcome and predictor
+is associated with a date/time stamp). For example, the
+mortality_temporal dataset in the AGOUti package. Note, the Datetime
+variable must be of class `Date` or `POSIXt`.
+
+```{r}
+data("mortality_temporal")
+knitr::kable(head(mortality_temporal), digits=2)
+class(mortality_temporal$Datetime)
+```
+
+This dataset contains a *Datetime* variable of class "POSIXt", a
+predictor variable *Temp* with an associated value for each value of
+*Datetime* and finally a response variable *Death*. Death is recorded
+daily not hourly and is only recorded at the 11th hour for each day.
+
+```{r}
+knitr::kable(mortality_temporal[23:25,])
+```
+
+### Format
+This dataset can be transformed to the required format using the
+`as_disag()` function as follows:
+
+```{r}
+disag_data <- agouti::as_disag(mortality_temporal$Datetime, response_df=mortality_temporal,time_group="%Y%m%d",outcome="Death")
+class(mortality_temporal)
+class(disag_data)
+knitr::kable(head(disag_data), digits=2)
+```
+
+The new transformed data is of class *as_disag*. The Datetime variable
+has been used to generate an ID at the level declared in the *timegroup*
+argument. Finally, a new outcome variable has been declared which
+duplicates the daily death to all time stamps and is only needed to make
+it easier to run next steps: summarise, visualise and analyse.
+
+### Summarise
+
+Using the function `agouti_summary()` we can summarise the variables
+that are at a higher resolution than the outcome.
+
+This function doesn't work great for this dataset - multiple groups have
+the same response but so this is why outcome gets included as the number
+of unique outcome values is not equal to the number of unique IDs --
+need to adapt this.
+
+```{r}
+agouti::agouti_summary(disag_data)
+```
+
+This summary shows the number of rows in our dataset. This represents
+the resolution of the predictor variables. These predictor variables
+fall within 4018 groups delineated the ID variable. In this dataset all
+groups are exactly the same size as we are dealing with hours in a day
+and there is no missing data.
+
+The table summarises all variables that are not aggregated, calculated
+the median within each group and then presents the median of these
+medians.
+
+### Visualise
+
+#### 1) `heat_hist()`
+
+This dataset contains only a single predictor. The function
+`heat_hist()` plots a histogram grouped by ID on the y axis ordered by
+the median predictor (x) within each group.
+
+::: {style="margin-bottom:50px;"}
+```{r}
+agouti::heat_hist(disag_data$Temp, disag_data$ID)+ ggplot2::ggtitle("Temp")
+```
+:::
+
+#### 2) `group_summary_plot()`
+
+To plot the predictor against the response we can use
+`group_summary_plot()`. This summarises the predictor/s by quantile and
+then plots these quantiles against the response data.
+
+::: {style="margin-bottom:50px;"}
+```{r}
+agouti::group_summary_plot(outcome ~ Temp, data = disag_data, ID = ID)
+```
+:::
+
+#### 3) `thresh_sm()`
+
+An alternative way of visualising the predictors and response is via the
+function `thresh_sm()`. The plot is created by calculating, within each
+group, the proportion of observations that are above a threshold. A
+scatter plot with a linear model is plotted of the relationship between
+this proportion and the aggregated output. The threshold is varied and
+small multiples of the different values are plotted. The number of
+multiples can be selected by the argument *small_mult*, the default is
+six.
+
+::: {style="margin-bottom:50px;"}
+```{r}
+agouti::thresh_sm(outcome ~ Temp, data = disag_data, ID = ID, small_mult=6)
+```
+:::
+
+#### 4) `link_plot()`
+
+The final plotting function available is `link_plot()`. This is a
+scatter plot with data from the aggregate unit "linked" by a line and
+colour coded to match.
+
+::: {style="margin-bottom:50px;"}
+```{r}
+agouti::link_plot(outcome ~ Temp, data = disag_data, ID = ID, weights = 1)
+```
+:::
+
+### Model
+
+## Example 4: Time-series
+
+In this example, your data is a timeseries of class *ts*. An example is
+of daily stock growth
+
+```{r}
+data("stock_vector")
+knitr::kable(head(stock_vector), digits=6)
+class(stock_vector)
+```
+
+This dataset contains a single variable of class *ts*, representing daily stock growth. Daily stock growth is a function of the previous days stock growth as well as the day before that. So we can create a lagged growth variable that represents our predictor. Where, each lag considered represents a different value for the predictor all corresponding to the same outcome value.
+
+### Format
+This dataset can be transformed to the required format using the `as_disag()` function and specifying the number of lags to be considered as follows:
+
+```{r}
+disag_ts <- agouti::as_disag(stock_vector, lags=10)
+class(disag_ts)
+knitr::kable(head(disag_ts), digits=6)
+```
+
+### Summarise
+
+Using the function `agouti_summary()` we can summarise the
+variables that are at a higher resolution than the outcome.
+
+```{r}
+agouti::agouti_summary(disag_ts,high_res="covariate")
+```
+
+This summary shows the number of rows in our dataset which is at the high resolution of the covariate. The covaraite falls within 4570 groups delineated by the ID variable and which represents the number of rows in the original dataset i.e. the low resolution outcome variable.
+
+The table summarises all variables that are not aggregated, calculated the median within each group and then presents the median of these medians.
+
+In this dataset, because we created 10 lags for every outcome value the first 10 outcomes contain NAs for some lags. As a result, the lagged growth variable summary has NAs. To consider the summary without the rows containing NA, add the argument *removeNA = TRUE*.
+
+```{r}
+agouti::agouti_summary(disag_ts,high_res="covariate",removeNA=TRUE)
+```
+
+
+### Visualise
+
+#### 1) `heat_hist()`
+
+This dataset contains only a single predictor. The function
+`heat_hist()` plots a histogram grouped by ID on the y axis ordered by
+the median predictor (x) within each group.
+
+::: {style="margin-bottom:50px;"}
+```{r}
+agouti::heat_hist(disag_ts$covariate, disag_ts$ID)+ ggplot2::ggtitle("Covariate")
+```
+:::
+
+#### 2) `group_summary_plot()`
+
+To plot the predictor against the response we can use
+`group_summary_plot()`. This summarises the predictor/s by quantile and
+then plots these quantiles against the response data.
+
+::: {style="margin-bottom:50px;"}
+```{r}
+agouti::group_summary_plot(outcome ~ covariate, data = disag_ts, ID = ID)
+```
+:::
+
+#### 3) Need to allow NAs in threshold and link plot...
+
+### Model
