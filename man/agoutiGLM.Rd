@@ -28,7 +28,7 @@ agoutiGLM(
 
 \item{family}{The error distribution defined with a family object or character.}
 
-\item{weights}{Which column to use as within group weights such as 
+\item{weights}{Which column to use as within group weights such as
 population or time.}
 
 \item{...}{Further parameters. Currently unused.}

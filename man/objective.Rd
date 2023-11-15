@@ -19,10 +19,10 @@ objective(beta, x, y, ID, inner, outer, likelihood_function, weights)
 
 \item{outer}{A character defining the outer link function.}
 
-\item{likelihood_function}{The likelihood (error) function given as a 
+\item{likelihood_function}{The likelihood (error) function given as a
 function such as dnorm.}
 
-\item{weights}{Which column to use as within group weights such as 
+\item{weights}{Which column to use as within group weights such as
 population or time.}
 }
 \description{
