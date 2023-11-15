@@ -211,9 +211,11 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
 #' @method as_disag POSIXt
 #' @export
 #' @examples
+#' \dontrun{
 #' data(mortality_temporal)
 #' disag_data <- as_disag(data=mortality_temporal$Datetime,
 #' response_df=mortality_temporal, outcome="Death")
+#' }
 
 as_disag.POSIXt <- function(data, time_group="%Y%m%d", ID="add",response_df, outcome="Death",...){
 
