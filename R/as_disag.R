@@ -92,7 +92,6 @@ as_disag.data.frame <- function (data,data2=NULL,outcome,...){
 
 #' Create a data.frame suitable for disaggregation regression modelling from
 #' a spatial polygons dataframe.
-#' @importFrom disaggregation parallelExtract
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom doParallel registerDoParallel
 #' @param data A spatial polygons data frame with a column named ID
@@ -122,7 +121,50 @@ as_disag.SpatialPolygonsDataFrame <- function (data, rstack, response_df,...){
   cl <- parallel::makeCluster(nCores)
   doParallel::registerDoParallel(cl)
   print("Extracting data from raster stack, this may take a while...")
-  result <- disaggregation::parallelExtract(rstack, data, id="ID",fun=NULL)
+  parallelExtract <- function(raster, shape, fun = mean, id = 'OBJECTID',  ...){
+
+    if (!requireNamespace("foreach", quietly = TRUE)) {
+      stop("foreach needed for this function to work. Please install it.",
+           call. = FALSE)
+    }
+
+    shape@data[, id] <- as.character(shape@data[, id])
+
+    i <- NULL
+    # Run extract in parallel.
+    values <- foreach::foreach(i = seq_along(shape)) %dopar% {
+      raster::extract(raster, shape[i, ], fun = fun, na.rm = TRUE, cellnumbers = TRUE, ...)
+    }
+    if(!is.null(fun)){
+      # If a summary function was given, just bind everything together and add ID column
+      df <- data.frame(do.call(rbind, values))
+      if(inherits(shape, 'SpatialPolygonsDataFrame')){
+        df <- cbind(ID = as.data.frame(shape)[, id], df)
+      } else{
+        df <- cbind(ID = names(shape), df)
+        id <- 'id'
+      }
+
+      names(df) <- c(id, names(raster))
+
+      return(df)
+    } else {
+      # If no summary was given we get a list of length n.shapes
+      #   each entry in the list is a dataframe with n.covariates columns
+      #   Want to make covariates columns, rbind shapes, and add shape and cell id columns.
+
+      # list of vectors, one for each covariate
+      values_id <- lapply(seq_along(values), function(x) data.frame(shape@data[, id][x], values[[x]][[1]]))
+
+
+      df <- do.call(rbind, values_id)
+      names(df) <- c(id, 'cellid', names(raster))
+
+      return(df)
+    }
+
+  }
+  result <- parallelExtract(rstack, data, id="ID",fun=NULL)
   parallel::stopCluster(cl)
 
   response_df <- dplyr::left_join(response_df, result, by = "ID")

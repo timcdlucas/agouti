@@ -22,7 +22,6 @@ Imports:
     magrittr,
     rlang,
     maxLik,
-    disaggregation,
     doParallel,
     lubridate,
     purrr,
