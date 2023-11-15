@@ -7,7 +7,7 @@
 #' @importFrom tidyr drop_na
 #' @param x A data frame suitable for use as aggregate output data.
 #' @param ID The column to use as the group ID column. Unquoted value.
-#' @param high_res A string or vector of strings specifiying a column or columns of high resolution variables to summarise.
+#' @param high_res A string or vector of strings specifying a column or columns of high resolution variables to summarise.
 #' default is NULL in which case the function will summarise all variables with more unique values than ID
 #' @param removeNA default is false, is removeNA is not equal to false, NA's will be dropped
 #' @export
@@ -17,6 +17,10 @@
 #' agouti_summary(madagascar_malaria, high_res=c("pop","EVI"))
 
 agouti_summary <- function(x, ID = ID, high_res=NA, removeNA = FALSE){
+
+  if(!(inherits(x, "as_disag")))
+    warning("Using data not of class as_disag, we advise first using the
+            function as_disag() to check and format your data")
 
   if(removeNA!=FALSE){
     x <- x %>% tidyr::drop_na()
@@ -51,7 +55,7 @@ agouti_summary <- function(x, ID = ID, high_res=NA, removeNA = FALSE){
   }
 
   number_vars <- x %>% dplyr::group_by({{ID}}) %>% dplyr::select(dplyr::any_of(not_agg_level)) %>% dplyr::select_if(is.numeric)
-  #if(length(not_agg_level) == 1){
+  # table doesn't make a single nice column when there is just one variable so addedd the below to handle this case
   if(ncol(number_vars) == 2 | length(high_res) == 1){
 
     col_name <- names(number_vars)[names(number_vars) != "ID"]
@@ -60,7 +64,7 @@ agouti_summary <- function(x, ID = ID, high_res=NA, removeNA = FALSE){
       dplyr::group_by({{ID}}) %>%
       dplyr::select(dplyr::any_of(col_name)) %>%
       dplyr::select_if(is.numeric) %>%
-      dplyr::summarise(across(c(all_of(col_name)), list(median=median,min=min,max=max))) %>%
+      dplyr::summarise(dplyr::across(c(dplyr::all_of(col_name)), list(median=median,min=min,max=max))) %>%
       dplyr::ungroup() %>%
       dplyr::select(- {{ID}}) %>%
       dplyr::summarise_all(median) %>%
