@@ -453,7 +453,6 @@ In this dataset, because we created 10 lags for every outcome value the first 10
 agouti::agouti_summary(disag_ts,high_res="covariate",removeNA=TRUE)
 ```
 
-
 ### Visualise
 
 #### 1) `heat_hist()`
