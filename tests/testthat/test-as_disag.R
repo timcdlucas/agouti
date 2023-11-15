@@ -3,15 +3,14 @@
 test_that("as_disag returns a dataframe in the correct format", {
 
   data("madagascar_malaria")
-  expect_is(as_disag(madagascar_malaria, outcome="case_rate"),"as_disag")
+  expect_true(inherits(as_disag(madagascar_malaria, outcome="case_rate"),"as_disag"))
 
   data("stock_vector")
-  expect_is(as_disag(stock_vector), "as_disag")
+  expect_true(inherits(as_disag(stock_vector), "as_disag"))
 
   data("mortality_temporal")
-  expect_is(as_disag(mortality_temporal$Datetime, response_df=mortality_temporal), "as_disag")
+  expect_true(inherits(as_disag(mortality_temporal$Datetime, response_df=mortality_temporal), "as_disag"))
 
-  ### expect true inherits class as_disag
   ## these tests so far only consider three of the methods
 })
 
