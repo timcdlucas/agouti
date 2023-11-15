@@ -300,9 +300,9 @@ mortality_temporal dataset in the AGOUti package. Note, the Datetime
 variable must be of class `Date` or `POSIXt`.
 
 ```{r}
-data("mortality_temporal")
-knitr::kable(head(mortality_temporal), digits=2)
-class(mortality_temporal$Datetime)
+# data("mortality_temporal")
+# knitr::kable(head(mortality_temporal), digits=2)
+# class(mortality_temporal$Datetime)
 ```
 
 This dataset contains a *Datetime* variable of class "POSIXt", a
@@ -319,10 +319,10 @@ This dataset can be transformed to the required format using the
 `as_disag()` function as follows:
 
 ```{r}
-disag_data <- agouti::as_disag(mortality_temporal$Datetime, response_df=mortality_temporal,time_group="%Y%m%d",outcome="Death")
-class(mortality_temporal)
-class(disag_data)
-knitr::kable(head(disag_data), digits=2)
+# disag_data <- agouti::as_disag(mortality_temporal$Datetime, response_df=mortality_temporal,time_group="%Y%m%d",outcome="Death")
+# class(mortality_temporal)
+# class(disag_data)
+# knitr::kable(head(disag_data), digits=2)
 ```
 
 The new transformed data is of class *as_disag*. The Datetime variable
@@ -342,7 +342,7 @@ of unique outcome values is not equal to the number of unique IDs --
 need to adapt this.
 
 ```{r}
-agouti::agouti_summary(disag_data)
+# agouti::agouti_summary(disag_data)
 ```
 
 This summary shows the number of rows in our dataset. This represents
@@ -365,7 +365,7 @@ the median predictor (x) within each group.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::heat_hist(disag_data$Temp, disag_data$ID)+ ggplot2::ggtitle("Temp")
+# agouti::heat_hist(disag_data$Temp, disag_data$ID)+ ggplot2::ggtitle("Temp")
 ```
 :::
 
@@ -377,7 +377,7 @@ then plots these quantiles against the response data.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::group_summary_plot(outcome ~ Temp, data = disag_data, ID = ID)
+# agouti::group_summary_plot(outcome ~ Temp, data = disag_data, ID = ID)
 ```
 :::
 
@@ -394,7 +394,7 @@ six.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::thresh_sm(outcome ~ Temp, data = disag_data, ID = ID, small_mult=6)
+# agouti::thresh_sm(outcome ~ Temp, data = disag_data, ID = ID, small_mult=6)
 ```
 :::
 
@@ -406,7 +406,7 @@ colour coded to match.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::link_plot(outcome ~ Temp, data = disag_data, ID = ID, weights = 1)
+# agouti::link_plot(outcome ~ Temp, data = disag_data, ID = ID, weights = 1)
 ```
 :::
 
