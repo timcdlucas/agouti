@@ -5,6 +5,7 @@ agouti
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/timcdlucas/agouti/workflows/R-CMD-check/badge.svg)](https://github.com/timcdlucas/agouti/actions)
+[![R-CMD-check](https://github.com/shk313/agouti/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/shk313/agouti/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 
