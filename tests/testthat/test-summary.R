@@ -1,12 +1,13 @@
 test_that("Summary fails if names of variables mis-spelt", {
   data("madagascar_malaria")
-  expect_error(agouti_summary(madagascar_malaria, high_res="POP"))
+  expect_error(agouti_summary(madagascar_malaria, high_res="POP"), "check spelling")
+
 })
 
 
 test_that("Summary fails if named ID variable is not present", {
   data("madagascar_malaria")
-  expect_error(agouti_summary(madagascar_malaria, ID="id"))
+  expect_error(agouti_summary(madagascar_malaria, ID="id"), "Data does not contain the variable")
 })
 
 
