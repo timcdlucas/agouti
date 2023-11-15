@@ -494,7 +494,7 @@ The stock data has some NA values, any rows with NA will be removed for plotting
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::thresh_sm(outcome ~ covaraite, data = disag_ts, ID = ID, small_mult=6)
+agouti::thresh_sm(outcome ~ covariate, data = disag_ts, ID = ID, small_mult=6)
 ```
 :::
 
