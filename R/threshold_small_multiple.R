@@ -20,7 +20,7 @@
 
 
 thresh_sm <- function(formula, data, ID = ID, weights = weights,
-                      small_mult = 25,
+                      small_mult = 6,
                       lower_percentile = 0.05,
                       upper_percentile = 0.95){
 
@@ -34,6 +34,11 @@ thresh_sm <- function(formula, data, ID = ID, weights = weights,
         data$weights <- 1
     }
 
+
+    data2 <- data %>% tidyr::drop_na()
+    if(nrow(data2) != nrow(data))
+      warning("Rows with NA have been removed")
+    data <- data %>% tidyr::drop_na()
     thresholds_sm <- stats::quantile(data[, x, drop = TRUE],
                               seq(lower_percentile, upper_percentile, length.out = small_mult))
 

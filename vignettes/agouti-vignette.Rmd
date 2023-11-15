@@ -480,6 +480,23 @@ agouti::group_summary_plot(outcome ~ covariate, data = disag_ts, ID = ID)
 ```
 :::
 
-#### 3) Need to allow NAs in threshold and link plot...
+#### 3) `thresh_sm()`
+
+An alternative way of visualising the predictors and response is via the
+function `thresh_sm()`. The plot is created by calculating, within each
+group, the proportion of observations that are above a threshold. A
+scatter plot with a linear model is plotted of the relationship between
+this proportion and the aggregated output. The threshold is varied and
+small multiples of the different values are plotted. The number of
+multiples can be selected by the argument *small_mult*, the default is
+six.
+
+The stock data has some NA values, any rows with NA will be removed for plotting
+
+::: {style="margin-bottom:50px;"}
+```{r}
+agouti::thresh_sm(outcome ~ covaraite, data = disag_ts, ID = ID, small_mult=6)
+```
+:::
 
 ### Model
