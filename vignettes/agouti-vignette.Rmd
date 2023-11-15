@@ -43,7 +43,7 @@ different examples of multi-resolution data each starting with different
 data structures:
 
 1.  You think you have a single tidy dataframe
-2.  2 dataframes. 1 containing the outcome data and another containing covariates
+2.  You have 1 dataframe containing the low-resolution outcome data and another containing high-resolution covariates
 3.  Temporal data
 4.  Timeseries data and you want a lagged covariate
 5.  Spatial data including shapefiles and rasters
@@ -105,7 +105,7 @@ a simple analysis.
 ### Summarise
 
 Using the function `agouti_summary()` we can easily summarise the
-variables that are at a higher resolution than the outcome.
+variables that are at a higher resolution than the outcome. Because the raw data was already in the correct format you can use this data in agouti_summary however, a warning will be printed to encourage you to first use *as_disag()*.
 
 ```{r}
 agouti::agouti_summary(disag_data)
@@ -125,6 +125,10 @@ medians. Alternatively you can specify which variables to summarise with the arg
 agouti::agouti_summary(disag_data, high_res=c("pop","EVI"))
 ```
 
+If you just used the raw madagascar_malaria dataset you would get the following:
+```{r}
+agouti::agouti_summary(madagascar_malaria)
+```
 
 ### Visualise
 
