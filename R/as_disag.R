@@ -3,38 +3,10 @@
 #'
 #' @param data A dataframe containing at least an outcome variable and ID variable named ID
 #' @param ... any other arguments
-#' @method
 #' @export
 as_disag <- function(data,...){
   UseMethod("as_disag")
 }
-
-#' Checks if a given dataframe is in the correct format for agouti functions
-#'
-# as_disag.default <- function(data,response="response",single_df=NULL){
-#
-#   responsename <- response
-#
-#   if(!(responsename %in% names(data)))
-#    stop(responsename, " variable not found in data, please check")
-#
-#
-#   if(!("ID" %in% names(data)))
-#     stop("ID varible not found in data, please check")
-#
-#   ## check if every row with the same ID has the same response
-#   df <- data %>% dplyr::group_by(.data$ID) %>%
-#     dplyr::mutate(unique_response = dplyr::n_distinct(responsename))
-#
-#   if(any(df$unique_response > 1))
-#     stop("Different responses found within the same ID group")
-#
-#
-#   print("Congrats, your data is in as_disag format")
-#   class(data) <- append("as_disag", class(data))
-#   return(data)
-#
-# }
 
 #' Checks if a given dataframe is in the correct format for agouti functions
 #'
@@ -48,7 +20,7 @@ as_disag <- function(data,...){
 #' @export
 #' @examples
 #' \dontrun{
-#' disag_data <- as_disag(data=temp_outcome, data2=temp_predictor, outcome="Death")
+#' disag_data <- as_disag(data=df_outcome, data2=df_predictor, outcome="Death")
 #' }
 #' data(madagascar_malaria)
 #' disag_data <- as_disag(data=madagascar_malaria,outcome="case_rate")
@@ -61,6 +33,19 @@ as_disag.data.frame <- function (data,data2=NULL,outcome,...){
       stop(outcomename, " variable not found in data, please check")
     if(!("ID" %in% names(data)))
       stop("ID varible not found in data, please check")
+
+
+    if(any(is.na(data[,{{outcomename}}]))){
+      check <- data %>%
+        dplyr::group_by(.data$ID) %>%
+        dplyr::mutate(unique_response = dplyr::n_distinct({{outcomename}}))
+      if(any(check$unique_response >1))
+        stop("Outcome variable contains more than one unique value for a given ID")
+      data <- data %>%
+        dplyr::group_by(.data$ID) %>%
+        dplyr::mutate(outcome=sum(get(outcomename),na.rm=TRUE))
+      print("NOTE: Outcome variable has been repeated for all rows with the same ID and stored in a new variable called outcome")
+    }
 
     data_tidy <- data
 
@@ -228,58 +213,5 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
 
   class(data_long) <- append("as_disag", class(data_long))
   return(data_long)
-
-}
-
-
-#' Create a data.frame suitable for disaggregation regression modelling from
-#' a temporal dataframe object.
-#'
-#' A series of lagged variables can be considered similar to disaggregation
-#' regression if we think that the order of the lagged variables is unimportant.
-#' For example, if we have millisecond resolution airpollution data relating to
-#' daily health outcomes, it is unimportant whether an airpollution measurement
-#' occured 2 miliseconds or 4 miliseconds before the health data cutoff time.
-#'
-#' @section More stuff
-#' @importFrom lubridate is.POSIXt is.Date
-#' @param data a column of a dataframe that is in datetime format
-#' @param time_group what is the format of the datetime variable at the level of the response in date-time format
-#' @param ID Either the name of the grouping variable or "add" which means an ID variable will be added 1:nrow()
-#' @param response_df a dataframe containing at least data,ID and outcome
-#' @param outcome A character string naming the variable which stores the outcome data
-#' @param ... any other arguments
-#' @return \code{as_disag.POSIXt} returns a dataframe that can be used with all agouti functions
-#' @method as_disag POSIXt
-#' @export
-#' @examples
-#' \dontrun{
-#' data(mortality_temporal)
-#' disag_data <- as_disag(data=mortality_temporal$Datetime,
-#' response_df=mortality_temporal, outcome="Death")
-#' }
-
-as_disag.POSIXt <- function(data, time_group="%Y%m%d", ID="add",response_df, outcome="Death",...){
-
-  if(!(lubridate::is.POSIXt(data) | lubridate::is.Date(data)))
-    stop("Data object is not of class date-time")
-
-  if(ID=="add"){
-    data2 <- response_df %>%
-      dplyr::mutate(ID=format(.data$Datetime, time_group)) %>%
-      dplyr::group_by(.data$ID) %>%
-      dplyr::mutate(outcome=sum(get(outcome),na.rm=TRUE))
-
-  }
-
-  ## check if every row with the same ID has the same response
-  df <- data2 %>% dplyr::group_by(.data$ID) %>%
-    dplyr::mutate(unique_response = dplyr::n_distinct(outcome))
-
-  if(any(df$unique_response > 1))
-    stop("Different responses found within the same ID group")
-
-  class(data2) <- append("as_disag", class(data2))
-  return(data2)
 
 }
