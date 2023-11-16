@@ -23,13 +23,15 @@ Imports:
     rlang,
     maxLik,
     doParallel,
-    lubridate,
     purrr,
-    tidyselect
+    tidyselect,
+    raster,
+    foreach
 Suggests: 
     rmarkdown,
     knitr,
-    testthat
+    testthat,
+    devtools
 License: MIT + file LICENSE
 URL: https://github.com/timcdlucas/agouti
 LazyData: true

@@ -79,6 +79,8 @@ as_disag.data.frame <- function (data,data2=NULL,outcome,...){
 #' a spatial polygons dataframe.
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom doParallel registerDoParallel
+#' @importFrom raster extract
+#' @importFrom foreach foreach
 #' @param data A spatial polygons data frame with a column named ID
 #' @param rstack A raster stack of rasters to be summarised at ID level
 #' @param response_df a dataframe containing the response data and an ID variable
