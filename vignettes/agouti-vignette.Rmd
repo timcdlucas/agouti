@@ -301,9 +301,9 @@ In this example, your data is a timeseries of class *ts*. An example is
 of daily stock growth
 
 ```{r}
-data("stock_vector")
-knitr::kable(head(stock_vector), digits=6)
-class(stock_vector)
+# data("stock_vector")
+# knitr::kable(head(stock_vector), digits=6)
+# class(stock_vector)
 ```
 
 This dataset contains a single variable of class *ts*, representing daily stock growth. Daily stock growth is a function of the previous days stock growth as well as the day before that. So we can create a lagged growth variable that represents our predictor. Where, each lag considered represents a different value for the predictor all corresponding to the same outcome value.
@@ -323,7 +323,7 @@ Using the function `agouti_summary()` we can summarise the
 variables that are at a higher resolution than the outcome.
 
 ```{r}
-agouti::agouti_summary(disag_ts,high_res="covariate")
+# agouti::agouti_summary(disag_ts,high_res="covariate")
 ```
 
 This summary shows the number of rows in our dataset which is at the high resolution of the covariate. The covaraite falls within 4570 groups delineated by the ID variable and which represents the number of rows in the original dataset i.e. the low resolution outcome variable.
@@ -333,7 +333,7 @@ The table summarises all variables that are not aggregated, calculated the media
 In this dataset, because we created 10 lags for every outcome value the first 10 outcomes contain NAs for some lags. As a result, the lagged growth variable summary has NAs. To consider the summary without the rows containing NA, add the argument *removeNA = TRUE*.
 
 ```{r}
-agouti::agouti_summary(disag_ts,high_res="covariate",removeNA=TRUE)
+# agouti::agouti_summary(disag_ts,high_res="covariate",removeNA=TRUE)
 ```
 
 ### Visualise
@@ -346,7 +346,7 @@ the median predictor (x) within each group.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::heat_hist(disag_ts$covariate, disag_ts$ID)+ ggplot2::ggtitle("Covariate")
+# agouti::heat_hist(disag_ts$covariate, disag_ts$ID)+ ggplot2::ggtitle("Covariate")
 ```
 :::
 
@@ -358,7 +358,7 @@ then plots these quantiles against the response data.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::group_summary_plot(outcome ~ covariate, data = disag_ts, ID = ID)
+# agouti::group_summary_plot(outcome ~ covariate, data = disag_ts, ID = ID)
 ```
 :::
 
@@ -377,7 +377,7 @@ The stock data has some NA values, any rows with NA will be removed for plotting
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::thresh_sm(outcome ~ covariate, data = disag_ts, ID = ID, small_mult=6)
+# agouti::thresh_sm(outcome ~ covariate, data = disag_ts, ID = ID, small_mult=6)
 ```
 :::
 
@@ -389,8 +389,40 @@ colour coded to match.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::link_plot(outcome ~ covariate, data = disag_ts, ID = ID, weights = 1)
+# agouti::link_plot(outcome ~ covariate, data = disag_ts, ID = ID, weights = 1)
 ```
 :::
 
 ### Model
+
+
+## Example 4 SpatialPolygonsDataFrame
+
+In this example you have an outcome variable that relates to polygons (often geographical  administrative units such as counties in the UK). Your covariates are high-resolution rasters and you first need to extract the relevant information from your rasters along with the identifying polygon information.
+
+Here we have three datasets 1) A dataframe containing the outcome variable and the ID of the polygon that value relates to. 2) A shapefile containing the polygons that are at the resolution of the outcome variable. 3) A raster or raster stack of high-resolution covariates.
+
+
+```{r}
+# three panel plot showing the three datasets
+# knitr::kable(head(wnv_cases), digits=2)
+# plot(wnv_shp)
+# plot(raster_stack[[1]])
+```
+
+
+### Format
+
+This dataset can be transformed to the required format using the `as_disag()` function and specifying the number of lags to be considered as follows:
+This function relies on parrallelExtract sourced from the disaggregation R package. Depending on the number of rasters in a stack and the size of the shapefile, this function may take a while to run.
+
+```{r}
+# disag_spdf <- agouti::as_disag(data=shapefile, rstack=rstack, response=wnv)
+# class(disag_spdf)
+# knitr::kable(head(disag_spdf), digits=2)
+```
+
+### Summarise
+
+
+
