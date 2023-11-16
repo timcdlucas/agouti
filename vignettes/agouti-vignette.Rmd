@@ -52,8 +52,9 @@ data structures. We advise readers to work through the first example irrespectiv
 4.  Spatial data including shapefiles and rasters
 
 ```{r setup, echo=FALSE}
-devtools::load_all()
-#library(agouti)
+#devtools::load_all()
+install.packages("agouti")
+library(agouti)
 df_outcome <- read.csv("C:/Users/SuzanneKeddie/OneDrive - London School of Hygiene and Tropical Medicine/Leicester/df_outcome.csv")
 df_covariate <- read.csv("C:/Users/SuzanneKeddie/OneDrive - London School of Hygiene and Tropical Medicine/Leicester/df_covaraite.csv")
 ```
