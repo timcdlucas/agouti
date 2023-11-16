@@ -55,8 +55,8 @@ data structures. We advise readers to work through the first example irrespectiv
 #devtools::load_all()
 install.packages("agouti")
 library(agouti)
-df_outcome <- read.csv("C:/Users/SuzanneKeddie/OneDrive - London School of Hygiene and Tropical Medicine/Leicester/df_outcome.csv")
-df_covariate <- read.csv("C:/Users/SuzanneKeddie/OneDrive - London School of Hygiene and Tropical Medicine/Leicester/df_covaraite.csv")
+# df_outcome <- read.csv("C:/Users/SuzanneKeddie/OneDrive - London School of Hygiene and Tropical Medicine/Leicester/df_outcome.csv")
+# df_covariate <- read.csv("C:/Users/SuzanneKeddie/OneDrive - London School of Hygiene and Tropical Medicine/Leicester/df_covaraite.csv")
 ```
 
 ## Example 1: You think you have a single tidy dataframe
@@ -201,8 +201,8 @@ agouti::link_plot(case_rate ~ LSTmean, data = disag_data, ID = ID, weights = pop
 In this example, the low-resolution outcome data is in one dataframe and the covariates which may or may not be high resolution, are in another dataframe. Both dataframes must contain an ID variable that links the high resolution and low resolution data
 
 ```{r}
-knitr::kable(head(df_outcome), digits=2)
-knitr::kable(head(df_covariate), digits=2)
+# knitr::kable(head(df_outcome), digits=2)
+# knitr::kable(head(df_covariate), digits=2)
 
 ```
 The outcome data are daily deaths and the covariate is hourly Temperature recordings. Both datasets contain a variable called *ID* derived from the Date/Datetime variables.
@@ -212,9 +212,9 @@ These datasets can be transformed to the required format using the
 `as_disag()` function as follows:
 
 ```{r}
-disag_data <- agouti::as_disag(data=df_outcome, data2=df_covariate, outcome="Death")
-class(disag_data)
-knitr::kable(head(disag_data), digits=2)
+# disag_data <- agouti::as_disag(data=df_outcome, data2=df_covariate, outcome="Death")
+# class(disag_data)
+# knitr::kable(head(disag_data), digits=2)
 ```
 
 Formatting these data returns a single dataframe of class *as_disag*. The outcome variable death is repeated for all observations within the same ID group.
@@ -225,7 +225,7 @@ Using the function `agouti_summary()` we can summarise the variable/s
 that are at a higher resolution than the outcome.
 
 ```{r}
-agouti::agouti_summary(disag_data)
+# agouti::agouti_summary(disag_data)
 ```
 
 This summary shows the number of rows in our dataset. This represents
@@ -248,7 +248,7 @@ the median predictor (x) within each group.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::heat_hist(disag_data$Temp, disag_data$ID)+ ggplot2::ggtitle("Temp")
+# agouti::heat_hist(disag_data$Temp, disag_data$ID)+ ggplot2::ggtitle("Temp")
 ```
 :::
 
@@ -260,7 +260,7 @@ then plots these quantiles against the response data.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::group_summary_plot(Death ~ Temp, data = disag_data, ID = ID)
+# agouti::group_summary_plot(Death ~ Temp, data = disag_data, ID = ID)
 ```
 :::
 
@@ -277,7 +277,7 @@ six.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::thresh_sm(Death ~ Temp, data = disag_data, ID = ID, small_mult=6)
+# agouti::thresh_sm(Death ~ Temp, data = disag_data, ID = ID, small_mult=6)
 ```
 :::
 
@@ -289,7 +289,7 @@ colour coded to match.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::link_plot(Death ~ Temp, data = disag_data, ID = ID, weights = 1)
+# agouti::link_plot(Death ~ Temp, data = disag_data, ID = ID, weights = 1)
 ```
 :::
 
