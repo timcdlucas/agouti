@@ -24,23 +24,28 @@ knitr::opts_chunk$set(
 # Introduction
 
 This vignette describes the use of the agouti R package, a generic R
-package for multi-resolution data. The goal is to improve the usability
-of multi-resolution data in statistical analyses
+package for exploratory analyses of multi-resolution data.
 
-Multi-resolution data is also referred to as mixed frequency and mis-aligned data. Examples of multi-resolution data can be found in various fields including epidemiology and econometrics. The key characteristic of any multi-resolution data, is that the outcome variable/s are at a lower resolution to predictor/s or covariate/s. 
+Multi-resolution data is also referred to as mixed frequency, mixed data and mis-aligned data. Examples of multi-resolution data can be found in various fields including epidemiology and econometrics. The key characteristic of any multi-resolution data, is that the outcome variable/s are at a lower resolution to predictor/s or covariate/s. 
 
-Examples of multi-resoltion data are an outcome of daily deaths of respiratory disease and covariates are recorded hourly. Similarly, an outcome may be deaths in
-a country but the covariates are at 5kmx5km resolution. Another, less intuitive example of multi-resolution data is that of a series of lagged variables. For example, daily growth in stock prices, the main covariate is the lagged growth rate. Instead of treating each considered lag as separate variables they can be treated as a single variable where one outcome, stock growth on day X, has Y lags associated.
+Examples of multi-resoltion data include an outcome of daily deaths of respiratory disease with covariates recorded hourly. Similarly, an outcome may be the number of deaths in a country but the covariates are at 5kmx5km resolution. Another, less intuitive example of multi-resolution data is that of a series of lagged variables. For example, daily growth in stock prices, the main covariate is the lagged growth rate. Instead of treating each considered lag as separate variables they can be treated as a single variable where one outcome, stock growth on day X, has Y lags associated.
 
-Currently, users of multi-resolution data have to seek out separate R packages for each use
-case for example, with spatial data you could use the *disaggregation* package, for econometric data there is *MIDAS* and for time-series data with lags there is *dlnm*. AGOUti does not replace these packages but rather is a generalised package that can help users with any type of multi-resolution data in the preliminary stages of analyses. AGOUti provides generic functions for multi-resolution data that help format, summarise, visualise and carry out simple exploratory analyses.
+Currently, users of multi-resolution data have to seek out separate R packages for each usecase for example, with spatial data you could use the *disaggregation* package, for econometric data there is *MIDAS* and for time-series data with lags there is *dlnm*. These packages provide complex statistical models and AGOUti does not replace these packages but rather is a more generalised package that can help users with more varied types of multi-resolution data in the preliminary stages of analyses. AGOUti provides generic functions for multi-resolution data that help format, summarise, visualise and carry out simple exploratory analyses.
 
-There are four important features of this package, the first is formatting. The function *`as_disag()`* takes multi-resolution data in whatever format and makes it of class *as_disag*. The second feature is to summarise, *`agouti_summary()`* takes an object of class
-*as_disag* and provides a summary of all high-resolution variables. Visualization is the third feature. AGOUti provides multiple plotting functions to investigate high-resolution covariates against a low-resolution response. The final feature is to run some simple analyses.
+There are four important features of this package, the first is formatting. The function *`as_disag()`* takes multi-resolution data in whatever format and makes it of class *as_disag*. The second feature is to summarise, *`agouti_summary()`* takes an object of class *as_disag* and provides a summary of all high-resolution variables. Visualisation is the third feature. AGOUti provides multiple plotting functions to investigate high-resolution covariates against a low-resolution response. The final feature is to run some simple analyses.
+
+Data visualisation is a difficult problem with aggregated outputs. 
+Even standard plots like scatter plots do not work because there are many covariate
+values for each response value.
+Simple plots, like using the aggregate output value for all covariate values 
+don't make much sense.
+There are two particular problems that the AGOUti package visualizations address.
+Firstly, the methods are scalable to hundreds or thousands of aggregate output data points. Secondly, the methods can help to detect the importance of non-linearity. 
+
 
 This vignette will show how the agouti R package can work for four
 different examples of multi-resolution data each starting with different
-data structures:
+data structures. We advise readers to work through the first example irrespective of the data structure in their own dataset.
 
 1.  You think you have a single tidy dataframe
 2.  You have 1 dataframe containing the low-resolution outcome data and another containing high-resolution covariates
@@ -49,9 +54,11 @@ data structures:
 5.  Spatial data including shapefiles and rasters
 
 ```{r setup, echo=FALSE}
+library(devtools)
+library(tidyverse)
+library(knitr)
 devtools::load_all()
 #library(agouti)
-# madagascar_malaria <- read.csv("C:/Users/SuzanneKeddie/OneDrive - London School of Hygiene and Tropical Medicine/Leicester/mdg_malaria.csv")
 df_outcome <- read.csv("C:/Users/SuzanneKeddie/OneDrive - London School of Hygiene and Tropical Medicine/Leicester/df_outcome.csv")
 df_covariate <- read.csv("C:/Users/SuzanneKeddie/OneDrive - London School of Hygiene and Tropical Medicine/Leicester/df_covaraite.csv")
 ```
