@@ -17,7 +17,7 @@ link_plot(formula, data, ID = ID, weights = weights)
 population or time.}
 }
 \description{
-This is a scatter plot which data from the aggregate unit "linked" by 
+This is a scatter plot which data from the aggregate unit "linked" by
 a line and colour coded to match.
 }
 \examples{

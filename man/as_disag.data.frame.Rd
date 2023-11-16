@@ -24,7 +24,7 @@ Checks if a given dataframe is in the correct format for agouti functions
 }
 \examples{
 \dontrun{
-disag_data <- as_disag(data=temp_outcome, data2=temp_predictor, outcome="Death")
+disag_data <- as_disag(data=df_outcome, data2=df_predictor, outcome="Death")
 }
 data(madagascar_malaria)
 disag_data <- as_disag(data=madagascar_malaria,outcome="case_rate")
