@@ -312,9 +312,9 @@ This dataset contains a single variable of class *ts*, representing daily stock 
 This dataset can be transformed to the required format using the `as_disag()` function and specifying the number of lags to be considered as follows:
 
 ```{r}
-disag_ts <- agouti::as_disag(stock_vector, lags=10)
-class(disag_ts)
-knitr::kable(head(disag_ts), digits=6)
+# disag_ts <- agouti::as_disag(stock_vector, lags=10)
+# class(disag_ts)
+# knitr::kable(head(disag_ts), digits=6)
 ```
 
 ### Summarise
