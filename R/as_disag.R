@@ -177,8 +177,10 @@ as_disag.SpatialPolygonsDataFrame <- function (data, rstack, response_df,...){
 #' @method as_disag ts
 #' @export
 #' @examples
+#' \dontrun{
 #' data(stock_vector)
 #' disag_data <- as_disag(data=stock_vector)
+#' }
 
 as_disag.ts <- function(data,lags=10, ID="add",...){
 
