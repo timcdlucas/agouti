@@ -3,7 +3,6 @@
 #'
 #' @param data A dataframe containing at least an outcome variable and ID variable named ID
 #' @param ... any other arguments
-#' @method
 #' @export
 as_disag <- function(data,...){
   UseMethod("as_disag")
