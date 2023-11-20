@@ -2,7 +2,7 @@
 % Please edit documentation in R/as_disag.R
 \name{as_disag}
 \alias{as_disag}
-\title{as_dsiag Generic function}
+\title{as_disag Generic function}
 \usage{
 as_disag(data, ...)
 }
@@ -12,5 +12,5 @@ as_disag(data, ...)
 \item{...}{any other arguments}
 }
 \description{
-as_dsiag Generic function
+as_disag Generic function
 }
