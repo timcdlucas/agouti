@@ -22,11 +22,9 @@ Imports:
     magrittr,
     rlang,
     maxLik,
-    doParallel,
     purrr,
     tidyselect,
-    raster,
-    foreach
+    terra
 Suggests: 
     rmarkdown,
     knitr,
