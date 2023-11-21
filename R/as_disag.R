@@ -97,155 +97,6 @@ as_disag.sf <- function (data, rstack, response_var="response",...){
   if(!(response_var %in% names(data)))
     stop("ID varible not found in response data, please check")
 
-  prepare_data <- function(polygon_shapefile,
-                           covariate_rasters,
-                           aggregation_raster = NULL,
-                           id_var = 'area_id',
-                           response_var = 'response',
-                           sample_size_var = NULL,
-                           # mesh.args = NULL,
-                           na.action = FALSE) {
-
-    stopifnot(inherits(polygon_shapefile, 'sf'))
-    stopifnot(inherits(covariate_rasters, 'SpatRaster'))
-    if(!is.null(aggregation_raster)) stopifnot(inherits(aggregation_raster, 'SpatRaster'))
-    stopifnot(inherits(id_var, 'character'))
-    stopifnot(inherits(response_var, 'character'))
-
-    # Check for NAs in response data
-    na_rows <- is.na(polygon_shapefile[, response_var, drop = TRUE])
-    if(sum(na_rows) != 0) {
-      if(na.action) {
-        polygon_shapefile <- polygon_shapefile[!na_rows, ]
-      } else {
-        stop('There are NAs in the response data. Please deal with these, or set na.action = TRUE')
-      }
-    }
-    getPolygonData <- function(shape, id_var = 'area_id', response_var = 'response', sample_size_var = NULL) {
-
-      if(is.null(sample_size_var)) {
-        polygon_df <- shape[, c(id_var, response_var), drop = TRUE]
-        polygon_df$N <- rep(NA, nrow(polygon_df))
-      } else {
-        polygon_df <- shape[, c(id_var, response_var, sample_size_var), drop = TRUE]
-      }
-
-      names(polygon_df) <- c('area_id', 'response', 'N')
-
-      return(polygon_df)
-    }
-
-    polygon_data <- getPolygonData(polygon_shapefile, id_var, response_var, sample_size_var)
-
-
-    # Save raster layer names so we can reassign it to make sure names don't change.
-    cov_names <- names(covariate_rasters)
-
-    # If no aggregation raster is given, use a 'unity' raster
-    if(is.null(aggregation_raster)) {
-      aggregation_raster <- covariate_rasters[[1]]
-      terra::values(aggregation_raster) <- rep(1, terra::ncell(aggregation_raster))
-    }
-    names(aggregation_raster) <- 'aggregation_raster'
-
-
-    covariate_rasters <- c(covariate_rasters, aggregation_raster)
-    covariate_data <- terra::extract(covariate_rasters, terra::vect(polygon_shapefile), cells=TRUE, na.rm=TRUE, ID=TRUE)
-    #merge to transfer area_id and then tidy up
-    polygon_data$area_n <- 1:nrow(polygon_data)
-    covariate_data <- merge(covariate_data, polygon_data, by.x = "ID", by.y = "area_n")
-    covariate_data <- covariate_data[ , !(names(covariate_data) %in% c("ID", "response", "N"))]
-    colnames(covariate_data )[colnames(covariate_data ) == "area_id"] <- id_var
-    polygon_data <- polygon_data[ , !(names(polygon_data) %in% c("area_n"))]
-
-    # Remove the aggregation raster
-    cov_filter <- !(names(covariate_data) %in% c('aggregation_raster'))
-    covariate_rasters <- covariate_rasters[[cov_filter]]
-    names(covariate_rasters) <- cov_names
-
-    agg_filter <- names(covariate_data) %in% c('aggregation_raster')
-    aggregation_pixels <- as.numeric(covariate_data[ , agg_filter])
-    covariate_data <- covariate_data[, !agg_filter]
-
-    # Check for NAs in population data
-    if(sum(is.na(aggregation_pixels)) != 0) {
-      if(na.action) {
-        aggregation_pixels[is.na(aggregation_pixels)] <- 0
-      } else {
-        stop('There are NAs in the aggregation rasters within polygons. Please deal with these, or set na.action = TRUE')
-      }
-    }
-
-    # Check for NAs in covariate data
-    if(sum(is.na(covariate_data)) != 0) {
-      if(na.action) {
-        cov_filter <- !(names(covariate_data) %in% c(id_var,'cell'))
-        covariate_data[ , cov_filter] <- sapply(covariate_data[ , cov_filter], function(x) { x[is.na(x)] <- stats::median(x, na.rm = T); return(x) })
-      } else {
-        stop('There are NAs in the covariate rasters within polygons. Please deal with these, or set na.action = TRUE')
-      }
-    }
-    # extractCoordsForMesh <- function(cov_rasters, selectIds = NULL) {
-    #
-    #   stopifnot(inherits(cov_rasters, 'SpatRaster'))
-    #   if(!is.null(selectIds)) stopifnot(inherits(selectIds, 'numeric'))
-    #
-    #   points_raster <- cov_rasters[[1]]
-    #   points_raster[is.na(terra::values(points_raster, mat = FALSE))] <- -9999
-    #   raster_pts <- terra::as.points(points_raster)
-    #   coords <- terra::crds(raster_pts)
-    #
-    #   # If specified, only retain certain pixel ids
-    #   if(!is.null(selectIds)) {
-    #     coords <- coords[selectIds, ]
-    #   }
-    #
-    #   return(coords)
-    #
-    # }
-    # coordsForFit <- extractCoordsForMesh(covariate_rasters, selectIds = covariate_data$cell)
-    #
-    # coordsForPrediction <- extractCoordsForMesh(covariate_rasters)
-    # getStartendindex <- function(covariates, polygon_data, id_var = 'area_id') {
-    #
-    #   stopifnot(ncol(polygon_data) == 3)
-    #   stopifnot(ncol(covariates) >= 2)
-    #   stopifnot(nrow(covariates) > nrow(polygon_data))
-    #   stopifnot(sum(polygon_data$area_id %in% covariates[, id_var]) == nrow(polygon_data))
-    #
-    #   # Create  startendindex matrix
-    #   # This defines which pixels in the matrix are associated with which polygon.
-    #   startendindex <- lapply(unique(covariates[, id_var]), function(x) range(which(covariates[, id_var] == x)))
-    #
-    #   startendindex <- do.call(rbind, startendindex)
-    #
-    #   whichindices <- terra::match(polygon_data$area_id, unique(covariates[, id_var]))
-    #
-    #   # c++ is zero indexed.
-    #   startendindex <- startendindex[whichindices, ] - 1L
-    #
-    #   return(startendindex)
-    # }
-    # startendindex <- getStartendindex(covariate_data, polygon_data, id_var = id_var)
-
-    # disag_data <- list(polygon_shapefile = polygon_shapefile,
-    #                    shapefile_names = list(id_var = id_var, response_var = response_var),
-    #                    covariate_rasters = covariate_rasters,
-    #                    polygon_data = polygon_data,
-    #                    covariate_data = covariate_data,
-    #                    aggregation_pixels = aggregation_pixels)
-                       #coordsForFit = coordsForFit,
-                       #coordsForPrediction = coordsForPrediction,
-                       #startendindex = startendindex)
-    #mesh = mesh)
-
-    disag_data <- covariate_data
-    disag_data <- disag_data %>% dplyr::left_join(polygon_shapefile, by = "ID")
-
-    return(disag_data)
-
-  }
-
   df_summ <- prepare_data(polygon_shapefile =data, covariate_rasters = rstack, id_var="ID",
                         response_var=response_var,na.action=TRUE)
 
@@ -256,6 +107,184 @@ as_disag.sf <- function (data, rstack, response_var="response",...){
 
 }
 
+#' Function to Extract polygon id and response data into a data.frame from a sf object
+#'  Taken from disaggregation package
+#' Returns a data.frame with a row for each polygon in the sf object and columns: area_id, response and N, containing the id of the
+#' polygon, the values of the response for that polygon, and the sample size respectively. If the data is not survey data (the sample size does
+#' not exist), this column will contain NAs.
+#'
+#' @param shape A sf object containing response data.
+#' @param id_var Name of column in shape object with the polygon id. Default 'area_id'.
+#' @param response_var Name of column in shape object with the response data. Default 'response'.
+#' @param sample_size_var For survey data, name of column in sf object (if it exists) with the sample size data. Default NULL.
+#'
+#' @return A data.frame with a row for each polygon in the sf object and columns: area_id, response and N, containing the id of the
+#' polygon, the values of the response for that polygon, and the sample size respectively. If the data is not survey data (the sample size does
+#' not exist), this column will contain NAs.
+#'
+#'
+#'
+getPolygonData <- function(shape, id_var = 'area_id', response_var = 'response', sample_size_var = NULL) {
+
+  if(is.null(sample_size_var)) {
+    polygon_df <- shape[, c(id_var, response_var), drop = TRUE]
+    polygon_df$N <- rep(NA, nrow(polygon_df))
+  } else {
+    polygon_df <- shape[, c(id_var, response_var, sample_size_var), drop = TRUE]
+  }
+
+  names(polygon_df) <- c('area_id', 'response', 'N')
+
+  return(polygon_df)
+}
+
+#' Function to extract values from high-resolution covariates and join to low-resolution
+#' polygon data
+#' This function is mostly taken from the disaggregation package
+#'
+#' @param polygon_shapefile sf object containing at least three columns: one with the geometried, one with the id for the polygons (\emph{id_var}) and one with the response data (\emph{response_var}); for binomial data, i.e survey data, it can also contain a sample size column (\emph{sample_size_var}).
+#' @param covariate_rasters SpatRaster of covariate rasters to be used in the model.
+#' @param aggregation_raster SpatRaster to aggregate pixel level predictions to polygon level e.g. population to aggregate prevalence. If this is not supplied a uniform raster will be used.
+#' @param id_var Name of column in sf object with the polygon id.
+#' @param response_var Name of column in sf object with the response data.
+#' @param sample_size_var For survey data, name of column in sf object (if it exists) with the sample size data.
+#' @param na.action logical. If TRUE, NAs in response will be removed, covariate NAs will be given the median value, aggregation NAs will be set to zero. Default FALSE (NAs in response or covariate data within the polygons will give errors).
+#' @return Returns a dataframe containing the values of covariates for each pixel with the associated polygon ID
+
+prepare_data <- function(polygon_shapefile,
+                         covariate_rasters,
+                         aggregation_raster = NULL,
+                         id_var = 'area_id',
+                         response_var = 'response',
+                         sample_size_var = NULL,
+                         na.action = FALSE) {
+
+  stopifnot(inherits(polygon_shapefile, 'sf'))
+  stopifnot(inherits(covariate_rasters, 'SpatRaster'))
+  if(!is.null(aggregation_raster)) stopifnot(inherits(aggregation_raster, 'SpatRaster'))
+  stopifnot(inherits(id_var, 'character'))
+  stopifnot(inherits(response_var, 'character'))
+
+  # Check for NAs in response data
+  na_rows <- is.na(polygon_shapefile[, response_var, drop = TRUE])
+  if(sum(na_rows) != 0) {
+    if(na.action) {
+      polygon_shapefile <- polygon_shapefile[!na_rows, ]
+    } else {
+      stop('There are NAs in the response data. Please deal with these, or set na.action = TRUE')
+    }
+  }
+
+
+  polygon_data <- getPolygonData(polygon_shapefile, id_var, response_var, sample_size_var)
+
+  # Save raster layer names so we can reassign it to make sure names don't change.
+  cov_names <- names(covariate_rasters)
+
+  # If no aggregation raster is given, use a 'unity' raster
+  if(is.null(aggregation_raster)) {
+    aggregation_raster <- covariate_rasters[[1]]
+    terra::values(aggregation_raster) <- rep(1, terra::ncell(aggregation_raster))
+  }
+  names(aggregation_raster) <- 'aggregation_raster'
+
+
+  covariate_rasters <- c(covariate_rasters, aggregation_raster)
+  covariate_data <- terra::extract(covariate_rasters, terra::vect(polygon_shapefile), cells=TRUE, na.rm=TRUE, ID=TRUE)
+  #merge to transfer area_id and then tidy up
+  polygon_data$area_n <- 1:nrow(polygon_data)
+  covariate_data <- merge(covariate_data, polygon_data, by.x = "ID", by.y = "area_n")
+  covariate_data <- covariate_data[ , !(names(covariate_data) %in% c("ID", "response", "N"))]
+  colnames(covariate_data )[colnames(covariate_data ) == "area_id"] <- id_var
+  polygon_data <- polygon_data[ , !(names(polygon_data) %in% c("area_n"))]
+
+  # Remove the aggregation raster
+  cov_filter <- !(names(covariate_data) %in% c('aggregation_raster'))
+  covariate_rasters <- covariate_rasters[[cov_filter]]
+  names(covariate_rasters) <- cov_names
+
+  agg_filter <- names(covariate_data) %in% c('aggregation_raster')
+  aggregation_pixels <- as.numeric(covariate_data[ , agg_filter])
+  covariate_data <- covariate_data[, !agg_filter]
+
+  # Check for NAs in population data
+  if(sum(is.na(aggregation_pixels)) != 0) {
+    if(na.action) {
+      aggregation_pixels[is.na(aggregation_pixels)] <- 0
+    } else {
+      stop('There are NAs in the aggregation rasters within polygons. Please deal with these, or set na.action = TRUE')
+    }
+  }
+
+  # Check for NAs in covariate data
+  if(sum(is.na(covariate_data)) != 0) {
+    if(na.action) {
+      cov_filter <- !(names(covariate_data) %in% c(id_var,'cell'))
+      covariate_data[ , cov_filter] <- sapply(covariate_data[ , cov_filter], function(x) { x[is.na(x)] <- stats::median(x, na.rm = T); return(x) })
+    } else {
+      stop('There are NAs in the covariate rasters within polygons. Please deal with these, or set na.action = TRUE')
+    }
+  }
+  # extractCoordsForMesh <- function(cov_rasters, selectIds = NULL) {
+  #
+  #   stopifnot(inherits(cov_rasters, 'SpatRaster'))
+  #   if(!is.null(selectIds)) stopifnot(inherits(selectIds, 'numeric'))
+  #
+  #   points_raster <- cov_rasters[[1]]
+  #   points_raster[is.na(terra::values(points_raster, mat = FALSE))] <- -9999
+  #   raster_pts <- terra::as.points(points_raster)
+  #   coords <- terra::crds(raster_pts)
+  #
+  #   # If specified, only retain certain pixel ids
+  #   if(!is.null(selectIds)) {
+  #     coords <- coords[selectIds, ]
+  #   }
+  #
+  #   return(coords)
+  #
+  # }
+  # coordsForFit <- extractCoordsForMesh(covariate_rasters, selectIds = covariate_data$cell)
+  #
+  # coordsForPrediction <- extractCoordsForMesh(covariate_rasters)
+  # getStartendindex <- function(covariates, polygon_data, id_var = 'area_id') {
+  #
+  #   stopifnot(ncol(polygon_data) == 3)
+  #   stopifnot(ncol(covariates) >= 2)
+  #   stopifnot(nrow(covariates) > nrow(polygon_data))
+  #   stopifnot(sum(polygon_data$area_id %in% covariates[, id_var]) == nrow(polygon_data))
+  #
+  #   # Create  startendindex matrix
+  #   # This defines which pixels in the matrix are associated with which polygon.
+  #   startendindex <- lapply(unique(covariates[, id_var]), function(x) range(which(covariates[, id_var] == x)))
+  #
+  #   startendindex <- do.call(rbind, startendindex)
+  #
+  #   whichindices <- terra::match(polygon_data$area_id, unique(covariates[, id_var]))
+  #
+  #   # c++ is zero indexed.
+  #   startendindex <- startendindex[whichindices, ] - 1L
+  #
+  #   return(startendindex)
+  # }
+  # startendindex <- getStartendindex(covariate_data, polygon_data, id_var = id_var)
+
+  # disag_data <- list(polygon_shapefile = polygon_shapefile,
+  #                    shapefile_names = list(id_var = id_var, response_var = response_var),
+  #                    covariate_rasters = covariate_rasters,
+  #                    polygon_data = polygon_data,
+  #                    covariate_data = covariate_data,
+  #                    aggregation_pixels = aggregation_pixels)
+  #coordsForFit = coordsForFit,
+  #coordsForPrediction = coordsForPrediction,
+  #startendindex = startendindex)
+  #mesh = mesh)
+
+  disag_data <- covariate_data
+  disag_data <- disag_data %>% dplyr::left_join(polygon_shapefile, by = "ID")
+
+  return(disag_data)
+
+}
 
 #' Create a data.frame suitable for disaggregation regression modelling from
 #' a time series object.
@@ -272,9 +301,10 @@ as_disag.sf <- function (data, rstack, response_var="response",...){
 #' @method as_disag ts
 #' @export
 #' @examples
+#' \dontrun{
 #' data(stock_vector)
 #' disag_data <- as_disag(data=stock_vector)
-#'
+#'}
 
 as_disag.ts <- function(data,lags=10, ID="add",...){
 
