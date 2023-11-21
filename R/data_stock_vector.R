@@ -1,4 +1,4 @@
-#' Stock data
+#' Stock vector
 #'
 #' This data contains stock data for the companys in the S&P500.
 #' The response variable, growth, is the a stocks closing price, divded by it's
@@ -12,7 +12,6 @@
 #' @format A ts vector with x observations:
 #' \describe{
 #' \item{growth}{A vector containing daily stock growths}
-
 #' }
 #' @examples
 #' data(stock_vector)

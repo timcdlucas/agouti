@@ -3,7 +3,7 @@
 \docType{data}
 \name{stock_vector}
 \alias{stock_vector}
-\title{Stock data}
+\title{Stock vector}
 \format{
 A ts vector with x observations:
 \describe{
