@@ -26,4 +26,4 @@ just_growth<-
 just_growth <- na.omit(just_growth) %>% pull(growth)
 
 stock_vector <- just_growth
-usethis::use_data(stock_vector,overwrite=TRUE)
+usethis::use_data(stock_vector, overwrite=TRUE)
