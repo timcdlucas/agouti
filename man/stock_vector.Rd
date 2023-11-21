@@ -11,7 +11,7 @@ A ts vector with x observations:
 }
 }
 \usage{
-data(stock_vector)
+stock_vector
 }
 \description{
 This data contains stock data for the companys in the S&P500.

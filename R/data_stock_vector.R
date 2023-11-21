@@ -13,7 +13,6 @@
 #' \describe{
 #' \item{growth}{A vector containing daily stock growths}
 #' }
-#' @usage data(stock_vector)
 #' @examples
 #' data(stock_vector)
 "stock_vector"
