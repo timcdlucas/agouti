@@ -19,7 +19,7 @@ The response variable, growth, is the a stocks closing price, divded by it's
 closing price the previous day, minus 1 (i.e. daily percentage change)
 }
 \examples{
-data(stock_vector)
+stock_vector
 }
 \seealso{
 The script to create this data set: \url{}

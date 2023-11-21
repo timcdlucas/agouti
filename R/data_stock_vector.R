@@ -14,5 +14,5 @@
 #' \item{growth}{A vector containing daily stock growths}
 #' }
 #' @examples
-#' data(stock_vector)
+#' stock_vector
 "stock_vector"
