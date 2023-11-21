@@ -105,18 +105,12 @@ as_disag.sf <- function (data, rstack, response_var="response",...){
                            sample_size_var = NULL,
                            # mesh.args = NULL,
                            na.action = FALSE) {
-    # makeMesh = TRUE,
-    #ncores = NULL) {
-
-    # if (!missing("ncores"))
-    #   warning("The ncores argument has been deprecated")
 
     stopifnot(inherits(polygon_shapefile, 'sf'))
     stopifnot(inherits(covariate_rasters, 'SpatRaster'))
     if(!is.null(aggregation_raster)) stopifnot(inherits(aggregation_raster, 'SpatRaster'))
     stopifnot(inherits(id_var, 'character'))
     stopifnot(inherits(response_var, 'character'))
-    # if(!is.null(mesh.args)) stopifnot(inherits(mesh.args, 'list'))
 
     # Check for NAs in response data
     na_rows <- is.na(polygon_shapefile[, response_var, drop = TRUE])
@@ -212,47 +206,40 @@ as_disag.sf <- function (data, rstack, response_var="response",...){
     # coordsForFit <- extractCoordsForMesh(covariate_rasters, selectIds = covariate_data$cell)
     #
     # coordsForPrediction <- extractCoordsForMesh(covariate_rasters)
-    getStartendindex <- function(covariates, polygon_data, id_var = 'area_id') {
-
-      stopifnot(ncol(polygon_data) == 3)
-      stopifnot(ncol(covariates) >= 2)
-      stopifnot(nrow(covariates) > nrow(polygon_data))
-      stopifnot(sum(polygon_data$area_id %in% covariates[, id_var]) == nrow(polygon_data))
-
-      # Create  startendindex matrix
-      # This defines which pixels in the matrix are associated with which polygon.
-      startendindex <- lapply(unique(covariates[, id_var]), function(x) range(which(covariates[, id_var] == x)))
-
-      startendindex <- do.call(rbind, startendindex)
-
-      whichindices <- terra::match(polygon_data$area_id, unique(covariates[, id_var]))
-
-      # c++ is zero indexed.
-      startendindex <- startendindex[whichindices, ] - 1L
-
-      return(startendindex)
-    }
-    startendindex <- getStartendindex(covariate_data, polygon_data, id_var = id_var)
-
-    # if(makeMesh) {
-    #   mesh <- build_mesh(polygon_shapefile, mesh.args)
-    # } else {
-    #   mesh <- NULL
-    #   message("A mesh is not being built. You will not be able to run a spatial model without a mesh.")
+    # getStartendindex <- function(covariates, polygon_data, id_var = 'area_id') {
+    #
+    #   stopifnot(ncol(polygon_data) == 3)
+    #   stopifnot(ncol(covariates) >= 2)
+    #   stopifnot(nrow(covariates) > nrow(polygon_data))
+    #   stopifnot(sum(polygon_data$area_id %in% covariates[, id_var]) == nrow(polygon_data))
+    #
+    #   # Create  startendindex matrix
+    #   # This defines which pixels in the matrix are associated with which polygon.
+    #   startendindex <- lapply(unique(covariates[, id_var]), function(x) range(which(covariates[, id_var] == x)))
+    #
+    #   startendindex <- do.call(rbind, startendindex)
+    #
+    #   whichindices <- terra::match(polygon_data$area_id, unique(covariates[, id_var]))
+    #
+    #   # c++ is zero indexed.
+    #   startendindex <- startendindex[whichindices, ] - 1L
+    #
+    #   return(startendindex)
     # }
+    # startendindex <- getStartendindex(covariate_data, polygon_data, id_var = id_var)
 
-    disag_data <- list(polygon_shapefile = polygon_shapefile,
-                       shapefile_names = list(id_var = id_var, response_var = response_var),
-                       covariate_rasters = covariate_rasters,
-                       polygon_data = polygon_data,
-                       covariate_data = covariate_data,
-                       aggregation_pixels = aggregation_pixels,
+    # disag_data <- list(polygon_shapefile = polygon_shapefile,
+    #                    shapefile_names = list(id_var = id_var, response_var = response_var),
+    #                    covariate_rasters = covariate_rasters,
+    #                    polygon_data = polygon_data,
+    #                    covariate_data = covariate_data,
+    #                    aggregation_pixels = aggregation_pixels)
                        #coordsForFit = coordsForFit,
                        #coordsForPrediction = coordsForPrediction,
-                       startendindex = startendindex)
+                       #startendindex = startendindex)
     #mesh = mesh)
 
-    disag_data <- disag_data$covariate_data
+    disag_data <- covariate_data
     disag_data <- disag_data %>% dplyr::left_join(polygon_shapefile, by = "ID")
 
     return(disag_data)
@@ -285,10 +272,9 @@ as_disag.sf <- function (data, rstack, response_var="response",...){
 #' @method as_disag ts
 #' @export
 #' @examples
-#' \dontrun{
 #' data(stock_vector)
 #' disag_data <- as_disag(data=stock_vector)
-#' }
+#'
 
 as_disag.ts <- function(data,lags=10, ID="add",...){
 
