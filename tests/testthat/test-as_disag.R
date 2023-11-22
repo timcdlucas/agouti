@@ -3,7 +3,7 @@
 test_that("as_disag returns a dataframe in the correct format", {
 
   data("madagascar_malaria")
-  expect_true(inherits(as_disag(madagascar_malaria, outcome="case_rate"),"as_disag"))
+  expect_true(inherits(as_disag(madagascar_malaria, response_var="case_rate"),"as_disag"))
 
   data("stock_vector")
   expect_true(inherits(as_disag(stock_vector), "as_disag"))
@@ -14,7 +14,7 @@ test_that("as_disag returns a dataframe in the correct format", {
 test_that("as_disag returns a dataframe containing an ID column", {
 
   data("madagascar_malaria")
-  expect_true("ID" %in% names(as_disag(madagascar_malaria, outcome="case_rate")))
+  expect_true("ID" %in% names(as_disag(madagascar_malaria, response_var="case_rate")))
 
   data("stock_vector")
   expect_true("ID" %in% names(as_disag(stock_vector)))
@@ -24,7 +24,7 @@ test_that("as_disag returns a dataframe containing an ID column", {
 test_that("as_disag returns a dataframe where all rows with the same ID have the same outcome value", {
 
   data("madagascar_malaria")
-  df <- as_disag(madagascar_malaria, outcome="case_rate") %>% dplyr::group_by(.data$ID)%>%
+  df <- as_disag(madagascar_malaria, response_var="case_rate") %>% dplyr::group_by(.data$ID)%>%
     dplyr::mutate(unique_response=dplyr::n_distinct(case_rate))
   expect_true(all(df$unique_response==1))
 
