@@ -1,11 +1,11 @@
 ---
-title: "AGOUti"
+title: "An introduction to the AGOUti package"
 output:
    rmarkdown::html_vignette:
      toc: true
-     toc_depth: 2
+     toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{AGOUti}
+  %\VignetteIndexEntry{An introduction to the AGOUti package}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -48,7 +48,7 @@ Firstly, the methods are scalable to hundreds or thousands of aggregate output d
 
 ## Key functions and how to use this vignette
 
-The key functions of **AGOUti** are `as_disag`, `agouti_summary`, plotting and `agoutiGLM`. The function *`as_disag()`* takes multi-resolution data with various structures formats it and makes it of class *as_disag*. The second feature is to summarise, *`agouti_summary()`* takes an object of class *as_disag* and provides a summary of all high-resolution variables. Visualisation is the third feature. **AGOUti** provides four plotting functions to investigate high-resolution covariates against a low-resolution response. The final feature is to run a simple analysis with `agoutiGLM`.
+The key functions of **AGOUti** are `as_disag`, `agouti_summary`, plotting and `agoutiGLM`. The function `as_disag()` takes multi-resolution data with various structures formats it and makes it of class `as_disag`. The second feature is to summarise, `agouti_summary()` takes an object of class `as_disag` and provides a summary of all high-resolution variables. Visualisation is the third feature. **AGOUti** provides four plotting functions to investigate high-resolution covariates against a low-resolution response. The final feature is to run a simple analysis with `agoutiGLM`.
 
 This vignette will demonstrate examples of using the **AGOUti** package with
 multi-resolution data of different formats. We advise readers work through the first example irrespective of the data structure in their own dataset before proceeding to the example most similar to their data.
@@ -56,7 +56,7 @@ multi-resolution data of different formats. We advise readers work through the f
 ## Examples:
 
 1.  You think you have a single tidy dataframe
-2.  You have 1 dataframe containing the low-resolution outcome data and another containing high-resolution covariates
+2.  You have separate datasets for the low-resolution response and the high-resolution covariates
 3.  Timeseries data and you want a lagged covariate
 4.  Spatial data including shapefiles and rasters
 
@@ -74,7 +74,7 @@ devtools::load_all()
 # df_covariate <- read.csv("C:/Users/SuzanneKeddie/OneDrive - London School of Hygiene and Tropical Medicine/Leicester/df_covaraite.csv")
 ```
 
-## Example 1: You think you have a single tidy dataframe
+### Example 1: You think you have a single tidy dataframe
 
 In this example, you think your data is already tidy. You have your high resolution covariate/s, low resolution outcome and an ID variable linking high and low resolutuion data in a single dataframe. 
 
@@ -99,13 +99,13 @@ This dataset contains the following variables:
     vegetation index and Land surface temperature mean)
 -   `longitude`:`latitude` other spatial identifying information
 
-### Format
+#### Format
 
 To check if this is in the correct format and to convert it to the correct format if not, we use the function `as_disag()`
 
 ```{r}
 data("madagascar_malaria")
-disag_data <- agouti::as_disag(madagascar_malaria, outcome="case_rate")
+disag_data <- agouti::as_disag(madagascar_malaria, response_var="case_rate")
 class(madagascar_malaria)
 class(disag_data)
 knitr::kable(head(disag_data), digits=2)
@@ -120,7 +120,7 @@ NOTE: the low-resolution outcome variable is repeated for all rows with the same
 Now we have an object of class `as_disag` we can summarise, plot and run
 a simple analysis.
 
-### Summarise
+#### Summarise
 
 Using the function `agouti_summary()` we can easily summarise the
 variables that are at a higher resolution than the outcome. Because the raw data was already in the correct format you can use this data in agouti_summary however, a warning will be printed to encourage you to first use *as_disag()*.
@@ -148,9 +148,9 @@ If you just used the raw madagascar_malaria dataset you would get the following:
 agouti::agouti_summary(madagascar_malaria)
 ```
 
-### Visualise
+#### Visualise
 
-#### 1) `heat_hist()`
+##### 1) `heat_hist()`
 
 First of all we might be interested to look at some of our predictor
 variables. The function `heat_hist()` plots a histogram grouped by ID on
@@ -167,7 +167,7 @@ agouti::heat_hist(disag_data$LSTmean, disag_data$ID)+ ggplot2::ggtitle("LSTmean"
 ```
 :::
 
-#### 2) `group_summary_plot()`
+##### 2) `group_summary_plot()`
 
 With heat_hist we looked at the predictors in isolation but we might
 want to visulaise the predictors against the response.
@@ -180,7 +180,7 @@ agouti::group_summary_plot(case_rate ~ LSTmean, data = disag_data, ID = ID, weig
 ```
 :::
 
-#### 3) `thresh_sm()`
+##### 3) `thresh_sm()`
 
 An alternative way of visualising the predictors and response is via the
 function `thresh_sm()`. The plot is created by calculating, within each
@@ -197,7 +197,7 @@ agouti::thresh_sm(case_rate ~ LSTmean, data = disag_data, ID = ID, weights = pop
 ```
 :::
 
-#### 4) `link_plot()`
+##### 4) `link_plot()`
 
 The final plotting function available is `link_plot()`. This is a
 scatter plot with data from the aggregate unit "linked" by a line and
@@ -209,9 +209,9 @@ agouti::link_plot(case_rate ~ LSTmean, data = disag_data, ID = ID, weights = pop
 ```
 :::
 
-### Model
+#### Model
 
-## Example 2: 2 dataframes, 1 for low-resolution outcome, 1 for high-resolution/covariates
+### Example 2: 2 dataframes, 1 for low-resolution outcome, 1 for high-resolution/covariates
 
 In this example, the low-resolution outcome data is in one dataframe and the covariates which may or may not be high resolution, are in another dataframe. Both dataframes must contain an ID variable that links the high resolution and low resolution data
 
@@ -222,7 +222,7 @@ In this example, the low-resolution outcome data is in one dataframe and the cov
 ```
 The outcome data are daily deaths and the covariate is hourly Temperature recordings. Both datasets contain a variable called *ID* derived from the Date/Datetime variables.
 
-### Format
+#### Format
 These datasets can be transformed to the required format using the
 `as_disag()` function as follows:
 
@@ -234,7 +234,7 @@ These datasets can be transformed to the required format using the
 
 Formatting these data returns a single dataframe of class *as_disag*. The outcome variable death is repeated for all observations within the same ID group.
 
-### Summarise
+#### Summarise
 
 Using the function `agouti_summary()` we can summarise the variable/s
 that are at a higher resolution than the outcome.
@@ -253,9 +253,9 @@ The table summarises all variables that are not aggregated (*Temp*), calculated
 the median within each group and then presents the median of these
 medians.
 
-### Visualise
+#### Visualise
 
-#### 1) `heat_hist()`
+##### 1) `heat_hist()`
 
 This dataset contains only a single predictor. The function
 `heat_hist()` plots a histogram grouped by ID on the y axis ordered by
@@ -267,7 +267,7 @@ the median predictor (x) within each group.
 ```
 :::
 
-#### 2) `group_summary_plot()`
+##### 2) `group_summary_plot()`
 
 To plot the predictor against the response we can use
 `group_summary_plot()`. This summarises the predictor/s by quantile and
@@ -279,7 +279,7 @@ then plots these quantiles against the response data.
 ```
 :::
 
-#### 3) `thresh_sm()`
+##### 3) `thresh_sm()`
 
 An alternative way of visualising the predictors and response is via the
 function `thresh_sm()`. The plot is created by calculating, within each
@@ -296,7 +296,7 @@ six.
 ```
 :::
 
-#### 4) `link_plot()`
+##### 4) `link_plot()`
 
 The final plotting function available is `link_plot()`. This is a
 scatter plot with data from the aggregate unit "linked" by a line and
@@ -308,9 +308,9 @@ colour coded to match.
 ```
 :::
 
-### Model
+#### Model
 
-## Example 3: Time-series
+### Example 3: Time-series
 
 In this example, your data is a timeseries of class *ts*. An example is
 of daily stock growth
@@ -323,7 +323,7 @@ class(stock_vector)
 
 This dataset contains a single variable of class *ts*, representing daily stock growth. Daily stock growth is a function of the previous days stock growth as well as the day before that. So we can create a lagged growth variable that represents our predictor. Where, each lag considered represents a different value for the predictor all corresponding to the same outcome value.
 
-### Format
+#### Format
 This dataset can be transformed to the required format using the `as_disag()` function and specifying the number of lags to be considered as follows:
 
 ```{r}
@@ -332,7 +332,7 @@ class(disag_ts)
 knitr::kable(head(disag_ts), digits=6)
 ```
 
-### Summarise
+#### Summarise
 
 Using the function `agouti_summary()` we can summarise the
 variables that are at a higher resolution than the outcome.
@@ -351,9 +351,9 @@ In this dataset, because we created 10 lags for every outcome value the first 10
 agouti::agouti_summary(disag_ts,high_res="covariate",removeNA=TRUE)
 ```
 
-### Visualise
+#### Visualise
 
-#### 1) `heat_hist()`
+##### 1) `heat_hist()`
 
 This dataset contains only a single predictor. The function
 `heat_hist()` plots a histogram grouped by ID on the y axis ordered by
@@ -365,7 +365,7 @@ agouti::heat_hist(disag_ts$covariate, disag_ts$ID)+ ggplot2::ggtitle("Covariate"
 ```
 :::
 
-#### 2) `group_summary_plot()`
+##### 2) `group_summary_plot()`
 
 To plot the predictor against the response we can use
 `group_summary_plot()`. This summarises the predictor/s by quantile and
@@ -377,7 +377,7 @@ agouti::group_summary_plot(outcome ~ covariate, data = disag_ts, ID = ID)
 ```
 :::
 
-#### 3) `thresh_sm()`
+##### 3) `thresh_sm()`
 
 An alternative way of visualising the predictors and response is via the
 function `thresh_sm()`. The plot is created by calculating, within each
@@ -396,7 +396,7 @@ agouti::thresh_sm(outcome ~ covariate, data = disag_ts, ID = ID, small_mult=6)
 ```
 :::
 
-#### 4) `link_plot()`
+##### 4) `link_plot()`
 
 The final plotting function available is `link_plot()`. This is a
 scatter plot with data from the aggregate unit "linked" by a line and
@@ -408,10 +408,10 @@ agouti::link_plot(outcome ~ covariate, data = disag_ts, ID = ID, weights = 1)
 ```
 :::
 
-### Model
+#### Model
 
 
-## Example 4 SpatialPolygonsDataFrame
+### Example 4 SpatialPolygonsDataFrame
 
 In this example you have an outcome variable that relates to polygons (often geographical  administrative units such as counties in the UK). Your covariates are high-resolution rasters and you first need to extract the relevant information from your rasters along with the identifying polygon information.
 
@@ -423,18 +423,18 @@ Here we have two datasets 1) A shapefile (using data from the package `SpatialEp
 ## get plot data
 polygons <- sf::st_as_sf(NYleukemia$spatial.polygon)
 df <- cbind(polygons, NYleukemia$data)
-p1 <- ggplot2::ggplot() + ggplot2::geom_sf(data = df, aes(fill = cases / population)) + ggplot2::scale_fill_viridis_c(lim = c(0, 0.003))
+ggplot2::ggplot() + ggplot2::geom_sf(data = df, aes(fill = cases / population)) + ggplot2::scale_fill_viridis_c(lim = c(0, 0.003))+ggtitle("Low-resolution polygons")
 # get raster data (using annual mean temp from bioclim croped to the extent of the polyongs) -- need to add this to git. vignette/
 covariate <- terra::rast("annual_mean_temp_newyork.tif")
 covariate_clip <- raster::crop(covariate, raster::extent(polygons))
 covariate_clip <- raster::mask(covariate_clip, polygons)
-p2 <- plot(covariate_clip)
+plot(covariate_clip, main="High-resolution covariate")
 # p1+p2
 
 ```
 
 
-### Format
+#### Format
 
 This dataset can be transformed to the required format using the `as_disag()` function and specifying the number of lags to be considered as follows:
 This function relies on parrallelExtract sourced from the disaggregation R package. Depending on the number of rasters in a stack and the size of the shapefile, this function may take a while to run.
@@ -445,7 +445,7 @@ This function relies on parrallelExtract sourced from the disaggregation R packa
 # knitr::kable(head(disag_spdf), digits=2)
 ```
 
-### Summarise
+#### Summarise
 
 
 
