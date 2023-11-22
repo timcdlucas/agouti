@@ -4,7 +4,7 @@
 \alias{as_disag.data.frame}
 \title{Checks if a given dataframe is in the correct format for agouti functions}
 \usage{
-\method{as_disag}{data.frame}(data, data2 = NULL, outcome, ...)
+\method{as_disag}{data.frame}(data, data2 = NULL, response_var, ...)
 }
 \arguments{
 \item{data}{A dataframe containing a outcome variable and ID variable named ID}
@@ -12,7 +12,7 @@
 \item{data2}{A dataframe default is NULL in which case we check the data is already in the correct format. If not null,
 the second data frame should contain predictor variables at a different resolution to the outcome but with the same linking ID variable}
 
-\item{outcome}{The name of the variable containing the response data}
+\item{response_var}{The name of the variable containing the response data}
 
 \item{...}{any other arguments}
 }
@@ -27,5 +27,5 @@ Checks if a given dataframe is in the correct format for agouti functions
 disag_data <- as_disag(data=df_outcome, data2=df_predictor, outcome="Death")
 }
 data(madagascar_malaria)
-disag_data <- as_disag(data=madagascar_malaria,outcome="case_rate")
+disag_data <- as_disag(data=madagascar_malaria,response_var="case_rate")
 }

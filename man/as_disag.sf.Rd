@@ -24,12 +24,10 @@ Create a data.frame suitable for disaggregation regression modelling from
 a sf object.
 }
 \examples{
-\dontrun{
 polygons <- sf::st_as_sf(NYleukemia$spatial.polygon)
 df <- cbind(polygons, NYleukemia$data)
 names(df)[1] <-"ID"
 covariate <- terra::rast("vignettes/annual_mean_temp_newyork.tif")
 disag_data <- as_disag(data=df, rstack=covariate, response_var="cases")
-}
 
 }
