@@ -56,6 +56,11 @@ multi-resolution data of different formats. We advise readers work through the f
 4.  Spatial data including shapefiles and rasters
 
 ```{r setup, echo=FALSE}
+library(SpatialEpi)
+library(sf)
+library(terra)
+library(ggplot2)
+
 devtools::load_all()
 #install.packages("agouti")
 #library(agouti)
@@ -305,9 +310,9 @@ In this example, your data is a timeseries of class *ts*. An example is
 of daily stock growth
 
 ```{r}
-# data("stock_vector")
-# knitr::kable(head(stock_vector), digits=6)
-# class(stock_vector)
+data("stock_vector")
+knitr::kable(head(stock_vector), digits=6)
+class(stock_vector)
 ```
 
 This dataset contains a single variable of class *ts*, representing daily stock growth. Daily stock growth is a function of the previous days stock growth as well as the day before that. So we can create a lagged growth variable that represents our predictor. Where, each lag considered represents a different value for the predictor all corresponding to the same outcome value.
@@ -316,9 +321,9 @@ This dataset contains a single variable of class *ts*, representing daily stock 
 This dataset can be transformed to the required format using the `as_disag()` function and specifying the number of lags to be considered as follows:
 
 ```{r}
-# disag_ts <- agouti::as_disag(stock_vector, lags=10)
-# class(disag_ts)
-# knitr::kable(head(disag_ts), digits=6)
+disag_ts <- agouti::as_disag(stock_vector, lags=10)
+class(disag_ts)
+knitr::kable(head(disag_ts), digits=6)
 ```
 
 ### Summarise
@@ -327,7 +332,7 @@ Using the function `agouti_summary()` we can summarise the
 variables that are at a higher resolution than the outcome.
 
 ```{r}
-# agouti::agouti_summary(disag_ts,high_res="covariate")
+agouti::agouti_summary(disag_ts,high_res="covariate")
 ```
 
 This summary shows the number of rows in our dataset which is at the high resolution of the covariate. The covaraite falls within 4570 groups delineated by the ID variable and which represents the number of rows in the original dataset i.e. the low resolution outcome variable.
@@ -337,7 +342,7 @@ The table summarises all variables that are not aggregated, calculated the media
 In this dataset, because we created 10 lags for every outcome value the first 10 outcomes contain NAs for some lags. As a result, the lagged growth variable summary has NAs. To consider the summary without the rows containing NA, add the argument *removeNA = TRUE*.
 
 ```{r}
-# agouti::agouti_summary(disag_ts,high_res="covariate",removeNA=TRUE)
+agouti::agouti_summary(disag_ts,high_res="covariate",removeNA=TRUE)
 ```
 
 ### Visualise
@@ -350,7 +355,7 @@ the median predictor (x) within each group.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-# agouti::heat_hist(disag_ts$covariate, disag_ts$ID)+ ggplot2::ggtitle("Covariate")
+agouti::heat_hist(disag_ts$covariate, disag_ts$ID)+ ggplot2::ggtitle("Covariate")
 ```
 :::
 
@@ -362,7 +367,7 @@ then plots these quantiles against the response data.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-# agouti::group_summary_plot(outcome ~ covariate, data = disag_ts, ID = ID)
+agouti::group_summary_plot(outcome ~ covariate, data = disag_ts, ID = ID)
 ```
 :::
 
@@ -381,7 +386,7 @@ The stock data has some NA values, any rows with NA will be removed for plotting
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-# agouti::thresh_sm(outcome ~ covariate, data = disag_ts, ID = ID, small_mult=6)
+agouti::thresh_sm(outcome ~ covariate, data = disag_ts, ID = ID, small_mult=6)
 ```
 :::
 
@@ -393,7 +398,7 @@ colour coded to match.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-# agouti::link_plot(outcome ~ covariate, data = disag_ts, ID = ID, weights = 1)
+agouti::link_plot(outcome ~ covariate, data = disag_ts, ID = ID, weights = 1)
 ```
 :::
 
@@ -404,14 +409,22 @@ colour coded to match.
 
 In this example you have an outcome variable that relates to polygons (often geographical  administrative units such as counties in the UK). Your covariates are high-resolution rasters and you first need to extract the relevant information from your rasters along with the identifying polygon information.
 
-Here we have three datasets 1) A dataframe containing the outcome variable and the ID of the polygon that value relates to. 2) A shapefile containing the polygons that are at the resolution of the outcome variable. 3) A raster or raster stack of high-resolution covariates.
+Here we have two datasets 1) A shapefile (using data from the package `SpatialEpi` containing the polygons that are at the resolution of the outcome variable. 2) A raster or raster stack of high-resolution covariates. These raster covariates contain many pixels within a single polygon and each pixel has a value associated
 
 
 ```{r}
-# three panel plot showing the three datasets
-# knitr::kable(head(wnv_cases), digits=2)
-# plot(wnv_shp)
-# plot(raster_stack[[1]])
+# two panel plot showing the datasets
+## get plot data
+polygons <- sf::st_as_sf(NYleukemia$spatial.polygon)
+df <- cbind(polygons, NYleukemia$data)
+p1 <- ggplot2::ggplot() + ggplot2::geom_sf(data = df, aes(fill = cases / population)) + ggplot2::scale_fill_viridis_c(lim = c(0, 0.003))
+# get raster data (using annual mean temp from bioclim croped to the extent of the polyongs) -- need to add this to git. vignette/
+covariate <- terra::rast("annual_mean_temp_newyork.tif")
+covariate_clip <- raster::crop(covariate, raster::extent(polygons))
+covariate_clip <- raster::mask(covariate_clip, polygons)
+p2 <- plot(covariate_clip)
+# p1+p2
+
 ```
 
 

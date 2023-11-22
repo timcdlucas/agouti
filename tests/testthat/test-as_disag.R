@@ -5,8 +5,15 @@ test_that("as_disag returns a dataframe in the correct format", {
   data("madagascar_malaria")
   expect_true(inherits(as_disag(madagascar_malaria, outcome="case_rate"),"as_disag"))
 
-  # data("stock_vector")
-  # expect_true(inherits(as_disag(stock_vector), "as_disag"))
+  data("stock_vector")
+  expect_true(inherits(as_disag(stock_vector), "as_disag"))
+
+  ## sf example
+  polygons <- sf::st_as_sf(NYleukemia$spatial.polygon)
+  df <- cbind(polygons, NYleukemia$data)
+  names(df)[1] <-"ID"
+  covariate <- terra::rast("vignettes/annual_mean_temp_newyork.tif")
+  expect_true(inherits(as_disag(data=df,rstack=covariate, response_var="cases")))
 
   ## these tests so far only consider three of the methods
 })
