@@ -32,18 +32,18 @@ Install **AGOUti** using:
 ```
 ## What is multi-resolution data and why are standard exploratory analyses difficult
 
-Multi-resolution data is also referred to as mixed frequency, mixed data and mis-aligned data. Examples of multi-resolution data can be found in various fields including epidemiology and econometrics. The key characteristic of any multi-resolution data, is that the outcome variable/s are at a lower resolution to predictor/s or covariate/s. 
+Multi-resolution data is also referred to as mixed frequency, mixed data and mis-aligned data. Examples of multi-resolution data can be found in various fields including epidemiology and econometrics. The key characteristic of multi-resolution data is that the response variable/s are at a lower resolution to the covariate/s. 
 
-Examples of multi-resoltion data include an outcome of daily deaths of respiratory disease with covariates recorded hourly. Similarly, an outcome may be the number of deaths in a country but the covariates are at 5kmx5km resolution. Another, less intuitive example of multi-resolution data is that of a series of lagged variables. For example, daily growth in stock prices, the main covariate is the lagged growth rate. Instead of treating each considered lag as separate variables they can be treated as a single variable where one outcome, stock growth on day X, has Y lags associated.
+Examples of multi-resoltion data include an outcome of daily deaths of respiratory disease with covariates recorded hourly or an outcome may be the number of deaths in a country with covariates at 5kmx5km resolution. Another, less intuitive example of multi-resolution data is that of a series of lagged variables. For example, daily growth in stock prices, the main covariate is the lagged growth rate. Instead of treating each lag as separate variables they can be treated as a single variable where one response, stock growth on day X, has Y lags associated (i.e. more than one covariate value for the same response).
 
-Currently, users of multi-resolution data have to seek out separate R packages for each usecase for example, with spatial data you could use the `disaggregation` package, for econometric data there is `MIDAS` and for time-series data with lags there is `dlnm`. These packages provide complex statistical models and AGOUti does not replace these packages but rather is a more generalised package that can help users with more varied types of multi-resolution data in the preliminary stages of analyses. **AGOUti** provides generic functions for multi-resolution data that help format, summarise, visualise and carry out simple exploratory analyses.
+Currently, users of multi-resolution data have to seek out separate R packages depending on each use case. For example, with spatial data you could use the `disaggregation` package, for econometric data there is `MIDAS` and for time-series data with lags there is `dlnm`. These packages provide complex statistical models and **AGOUti** does not replace these packages but rather is a more generalised package that can help users with more varied types of multi-resolution data in the preliminary stages of analyses. **AGOUti** provides generic functions for multi-resolution data that help format, summarise, visualise and carry out simple exploratory analyses.
 
 Data visualisation is a difficult problem with aggregated outputs. 
 Even standard plots like scatter plots do not work because there are many covariate
 values for each response value.
 Simple plots, like using the aggregate output value for all covariate values 
 don't make much sense.
-There are two particular problems that the AGOUti package visualizations address.
+There are two particular problems that the **AGOUti** package visualizations address.
 Firstly, the methods are scalable to hundreds or thousands of aggregate output data points. Secondly, the methods can help to detect the importance of non-linearity. 
 
 ## Key functions and how to use this vignette
@@ -419,30 +419,27 @@ Here we have two datasets 1) A shapefile (using data from the package `SpatialEp
 
 
 ```{r}
-# two panel plot showing the datasets
-## get plot data
+# get polygon data from SpatialEpi pacakge
 polygons <- sf::st_as_sf(NYleukemia$spatial.polygon)
 df <- cbind(polygons, NYleukemia$data)
 ggplot2::ggplot() + ggplot2::geom_sf(data = df, aes(fill = cases / population)) + ggplot2::scale_fill_viridis_c(lim = c(0, 0.003))+ggtitle("Low-resolution polygons")
-# get raster data (using annual mean temp from bioclim croped to the extent of the polyongs) -- need to add this to git. vignette/
+# get raster data (using annual mean temp from bioclim cropped to the extent of the polygons)
 covariate <- terra::rast("annual_mean_temp_newyork.tif")
 covariate_clip <- raster::crop(covariate, raster::extent(polygons))
 covariate_clip <- raster::mask(covariate_clip, polygons)
 plot(covariate_clip, main="High-resolution covariate")
-# p1+p2
-
 ```
 
 
 #### Format
 
-This dataset can be transformed to the required format using the `as_disag()` function and specifying the number of lags to be considered as follows:
-This function relies on parrallelExtract sourced from the disaggregation R package. Depending on the number of rasters in a stack and the size of the shapefile, this function may take a while to run.
+This dataset can be transformed to the required format using the `as_disag()` function:
 
 ```{r}
-# disag_spdf <- agouti::as_disag(data=shapefile, rstack=rstack, response=wnv)
-# class(disag_spdf)
-# knitr::kable(head(disag_spdf), digits=2)
+names(df)[1] <-"ID"
+disag_sf <- agouti::as_disag(data=df, rstack=covariate, response_var="cases")
+class(disag_sf)
+knitr::kable(head(disag_sf), digits=2)
 ```
 
 #### Summarise

@@ -91,6 +91,7 @@ as_disag.data.frame <- function (data,data2=NULL,response_var,...){
 #' @method as_disag sf
 #' @export
 #' @examples
+#' data("NYleukemia")
 #' polygons <- sf::st_as_sf(NYleukemia$spatial.polygon)
 #' df <- cbind(polygons, NYleukemia$data)
 #' names(df)[1] <-"ID"
