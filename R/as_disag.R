@@ -13,7 +13,7 @@ as_disag <- function(data,...){
 #' @param data A dataframe containing a outcome variable and ID variable named ID
 #' @param data2 A dataframe default is NULL in which case we check the data is already in the correct format. If not null,
 #'  the second data frame should contain predictor variables at a different resolution to the outcome but with the same linking ID variable
-#' @param outcome The name of the variable containing the response data
+#' @param response_var The name of the variable containing the response data
 #' @param ... any other arguments
 #' @return \code{as_disag.data.frame} returns a dataframe that can be used with all agouti functions.
 #' @method as_disag data.frame
@@ -23,28 +23,28 @@ as_disag <- function(data,...){
 #' disag_data <- as_disag(data=df_outcome, data2=df_predictor, outcome="Death")
 #' }
 #' data(madagascar_malaria)
-#' disag_data <- as_disag(data=madagascar_malaria,outcome="case_rate")
-as_disag.data.frame <- function (data,data2=NULL,outcome,...){
+#' disag_data <- as_disag(data=madagascar_malaria,response_var="case_rate")
+as_disag.data.frame <- function (data,data2=NULL,response_var,...){
 
   if(is.null(data2)){
-    outcomename <- outcome
+    responsename <- response_var
 
-    if(!(outcomename %in% names(data)))
-      stop(outcomename, " variable not found in data, please check")
+    if(!(responsename %in% names(data)))
+      stop(responsename, " variable not found in data, please check")
     if(!("ID" %in% names(data)))
       stop("ID varible not found in data, please check")
 
 
-    if(any(is.na(data[,{{outcomename}}]))){
+    if(any(is.na(data[,{{responsename}}]))){
       check <- data %>%
         dplyr::group_by(.data$ID) %>%
-        dplyr::mutate(unique_response = dplyr::n_distinct({{outcomename}}))
+        dplyr::mutate(unique_response = dplyr::n_distinct({{responsename}}))
       if(any(check$unique_response >1))
-        stop("Outcome variable contains more than one unique value for a given ID")
+        stop("Response variable contains more than one unique value for a given ID")
       data <- data %>%
         dplyr::group_by(.data$ID) %>%
-        dplyr::mutate(outcome=sum(get(outcomename),na.rm=TRUE))
-      print("NOTE: Outcome variable has been repeated for all rows with the same ID and stored in a new variable called outcome")
+        dplyr::mutate(response=sum(get(responsename),na.rm=TRUE))
+      print(paste0("NOTE: ",response_var, " variable has been repeated for all rows with the same ID and stored in a new variable named response"))
     }
 
     data_tidy <- data
@@ -64,8 +64,13 @@ as_disag.data.frame <- function (data,data2=NULL,outcome,...){
   }
 
   ## check if every row with the same ID has the same response
+  if("response" %in% names(data_tidy)){
   df <- data_tidy %>% dplyr::group_by(.data$ID) %>%
-    dplyr::mutate(unique_response = dplyr::n_distinct(outcome))
+    dplyr::mutate(unique_response = dplyr::n_distinct(response))
+  }else{
+    df <- data_tidy %>% dplyr::group_by(.data$ID) %>%
+      dplyr::mutate(unique_response = dplyr::n_distinct({{responsename}}))
+  }
 
   if(any(df$unique_response > 1))
     stop("Different responses found within the same ID group")
@@ -86,13 +91,11 @@ as_disag.data.frame <- function (data,data2=NULL,outcome,...){
 #' @method as_disag sf
 #' @export
 #' @examples
-#' \dontrun{
 #' polygons <- sf::st_as_sf(NYleukemia$spatial.polygon)
 #' df <- cbind(polygons, NYleukemia$data)
 #' names(df)[1] <-"ID"
 #' covariate <- terra::rast("vignettes/annual_mean_temp_newyork.tif")
 #' disag_data <- as_disag(data=df, rstack=covariate, response_var="cases")
-#' }
 #'
 as_disag.sf <- function (data, rstack, response_var="response",...){
 
