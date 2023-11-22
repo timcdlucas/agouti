@@ -26,6 +26,13 @@ test_that("as_disag returns a dataframe containing an ID column", {
   data("stock_vector")
   expect_true("ID" %in% names(as_disag(stock_vector)))
 
+  ## sf example
+  polygons <- sf::st_as_sf(NYleukemia$spatial.polygon)
+  df <- cbind(polygons, NYleukemia$data)
+  names(df)[1] <-"ID"
+  covariate <- terra::rast("vignettes/annual_mean_temp_newyork.tif")
+  expect_true("ID" %in% names(as_disag(data=df,rstack=covariate, response_var="cases")))
+
 })
 
 test_that("as_disag returns a dataframe where all rows with the same ID have the same outcome value", {
@@ -39,6 +46,15 @@ test_that("as_disag returns a dataframe where all rows with the same ID have the
   df <- as_disag(stock_vector) %>% dplyr::group_by(.data$ID)%>%
     dplyr::mutate(unique_response=dplyr::n_distinct(outcome))
   expect_true(all(df$unique_response==1))
+
+  ## sf example
+  polygons <- sf::st_as_sf(NYleukemia$spatial.polygon)
+  df <- cbind(polygons, NYleukemia$data)
+  names(df)[1] <-"ID"
+  covariate <- terra::rast("vignettes/annual_mean_temp_newyork.tif")
+  df2 <- as_disag(data=df,rstack=covariate, response_var="cases") %>% dplyr::group_by(.data$ID)%>%
+    dplyr::mutate(unique_response=dplyr::n_distinct(cases))
+  expect_true(all(df2$unique_response==1))
 
 
 })

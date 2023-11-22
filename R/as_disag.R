@@ -87,8 +87,13 @@ as_disag.data.frame <- function (data,data2=NULL,outcome,...){
 #' @export
 #' @examples
 #' \dontrun{
-#' disag_data <- as_disag(data=shapefile, rstack=rstack, response_var=Human.cases)
+#' polygons <- sf::st_as_sf(NYleukemia$spatial.polygon)
+#' df <- cbind(polygons, NYleukemia$data)
+#' names(df)[1] <-"ID"
+#' covariate <- terra::rast("vignettes/annual_mean_temp_newyork.tif")
+#' disag_data <- as_disag(data=df, rstack=covariate, response_var="cases")
 #' }
+#'
 as_disag.sf <- function (data, rstack, response_var="response",...){
 
   ## first need some checks on each of the objects
@@ -225,59 +230,6 @@ prepare_data <- function(polygon_shapefile,
       stop('There are NAs in the covariate rasters within polygons. Please deal with these, or set na.action = TRUE')
     }
   }
-  # extractCoordsForMesh <- function(cov_rasters, selectIds = NULL) {
-  #
-  #   stopifnot(inherits(cov_rasters, 'SpatRaster'))
-  #   if(!is.null(selectIds)) stopifnot(inherits(selectIds, 'numeric'))
-  #
-  #   points_raster <- cov_rasters[[1]]
-  #   points_raster[is.na(terra::values(points_raster, mat = FALSE))] <- -9999
-  #   raster_pts <- terra::as.points(points_raster)
-  #   coords <- terra::crds(raster_pts)
-  #
-  #   # If specified, only retain certain pixel ids
-  #   if(!is.null(selectIds)) {
-  #     coords <- coords[selectIds, ]
-  #   }
-  #
-  #   return(coords)
-  #
-  # }
-  # coordsForFit <- extractCoordsForMesh(covariate_rasters, selectIds = covariate_data$cell)
-  #
-  # coordsForPrediction <- extractCoordsForMesh(covariate_rasters)
-  # getStartendindex <- function(covariates, polygon_data, id_var = 'area_id') {
-  #
-  #   stopifnot(ncol(polygon_data) == 3)
-  #   stopifnot(ncol(covariates) >= 2)
-  #   stopifnot(nrow(covariates) > nrow(polygon_data))
-  #   stopifnot(sum(polygon_data$area_id %in% covariates[, id_var]) == nrow(polygon_data))
-  #
-  #   # Create  startendindex matrix
-  #   # This defines which pixels in the matrix are associated with which polygon.
-  #   startendindex <- lapply(unique(covariates[, id_var]), function(x) range(which(covariates[, id_var] == x)))
-  #
-  #   startendindex <- do.call(rbind, startendindex)
-  #
-  #   whichindices <- terra::match(polygon_data$area_id, unique(covariates[, id_var]))
-  #
-  #   # c++ is zero indexed.
-  #   startendindex <- startendindex[whichindices, ] - 1L
-  #
-  #   return(startendindex)
-  # }
-  # startendindex <- getStartendindex(covariate_data, polygon_data, id_var = id_var)
-
-  # disag_data <- list(polygon_shapefile = polygon_shapefile,
-  #                    shapefile_names = list(id_var = id_var, response_var = response_var),
-  #                    covariate_rasters = covariate_rasters,
-  #                    polygon_data = polygon_data,
-  #                    covariate_data = covariate_data,
-  #                    aggregation_pixels = aggregation_pixels)
-  #coordsForFit = coordsForFit,
-  #coordsForPrediction = coordsForPrediction,
-  #startendindex = startendindex)
-  #mesh = mesh)
 
   disag_data <- covariate_data
   disag_data <- disag_data %>% dplyr::left_join(polygon_shapefile, by = "ID")
