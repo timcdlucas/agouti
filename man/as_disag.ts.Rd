@@ -27,8 +27,6 @@ NA
 }
 
 \examples{
-\dontrun{
 data(stock_vector)
 disag_data <- as_disag(data=stock_vector)
-}
 }

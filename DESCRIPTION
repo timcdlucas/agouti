@@ -24,7 +24,10 @@ Imports:
     maxLik,
     purrr,
     tidyselect,
-    terra
+    terra,
+    sf,
+    SpatialEpi,
+    raster
 Suggests: 
     rmarkdown,
     knitr,
