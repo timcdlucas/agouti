@@ -91,13 +91,14 @@ as_disag.data.frame <- function (data,data2=NULL,response_var,...){
 #' @method as_disag sf
 #' @export
 #' @examples
+#' \dontrun{
 #' data("NYleukemia")
 #' polygons <- sf::st_as_sf(NYleukemia$spatial.polygon)
 #' df <- cbind(polygons, NYleukemia$data)
 #' names(df)[1] <-"ID"
 #' covariate <- terra::rast("vignettes/annual_mean_temp_newyork.tif")
 #' disag_data <- as_disag(data=df, rstack=covariate, response_var="cases")
-#'
+#'}
 as_disag.sf <- function (data, rstack, response_var="response",...){
 
   ## first need some checks on each of the objects
