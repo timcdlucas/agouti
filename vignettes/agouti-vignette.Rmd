@@ -202,7 +202,7 @@ agouti::link_plot(case_rate ~ LSTmean, data = disag_data, ID = ID, weights = pop
 As preliminary analyses a simple glm can be fitted using `agoutiGLM`.
 
 ```{r}
-agouti::agoutiGLM(case_rate ~ LSTmean, data = madagascar_malaria, ID = madagascar_malaria$ID, weights = madagascar_malaria$pop,inner_link = 'identity', outer_link = 'identity', family = 'gaussian')
+agouti::agoutiGLM(case_rate ~ LSTmean, data = disag_data, ID = disag_data$ID, weights = disag_data$pop,inner_link = 'identity', outer_link = 'identity', family = 'gaussian')
 ```
 
 ### Example 2: Timeseries data with a lagged covariate
