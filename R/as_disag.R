@@ -26,6 +26,9 @@ as_disag <- function(data,...){
 #' disag_data <- as_disag(data=madagascar_malaria,response_var="case_rate")
 as_disag.data.frame <- function (data,data2=NULL,response_var,...){
 
+  if(inherits(data, "as_disag"))
+    stop("Data is already of class as_disag")
+
   if(is.null(data2)){
     responsename <- response_var
 
