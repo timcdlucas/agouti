@@ -18,8 +18,8 @@
 
 agouti_summary <- function(x, ID = ID, high_res=NA, na.rm = FALSE){
 
-  if(!(inherits(x, "as_disag")))
-    warning("Using data not of class as_disag, we advise first using the
+  if(!(inherits(x, "disag")))
+    warning("Using data not of class disag, we advise first using the
             function as_disag() to check and format your data")
 
   if(na.rm!=FALSE){

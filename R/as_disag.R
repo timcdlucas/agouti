@@ -26,8 +26,8 @@ as_disag <- function(data,...){
 #' disag_data <- as_disag(data=madagascar_malaria,response_var="case_rate")
 as_disag.data.frame <- function (data,data2=NULL,response_var,...){
 
-  if(inherits(data, "as_disag"))
-    stop("Data is already of class as_disag")
+  if(inherits(data, "disag"))
+    stop("Data is already of class disag")
 
   if(is.null(data2)){
     responsename <- response_var
@@ -78,7 +78,7 @@ as_disag.data.frame <- function (data,data2=NULL,response_var,...){
   if(any(df$unique_response > 1))
     stop("Different responses found within the same ID group")
 
-  class(data_tidy) <- append("as_disag", class(data_tidy))
+  class(data_tidy) <- append("disag", class(data_tidy))
   return(data_tidy)
 
 }
@@ -109,7 +109,7 @@ as_disag.sf <- function (data, rstack, response_var="response",...){
                         response_var=response_var,na.action=TRUE)
 
 
-  class(df_summ) <- append("as_disag", class(df_summ))
+  class(df_summ) <- append("disag", class(df_summ))
   return(df_summ)
 
 
@@ -293,7 +293,7 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
   # Wide to long format
   data_long  <- data_lags %>% tidyr::gather(lag, "covariate", tidyselect::all_of(a), factor_key=TRUE)
 
-  class(data_long) <- append("as_disag", class(data_long))
+  class(data_long) <- append("disag", class(data_long))
   return(data_long)
 
 }
