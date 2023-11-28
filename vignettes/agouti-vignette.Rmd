@@ -78,6 +78,8 @@ In this example, you think your data is already tidy. You have your high resolut
 An example, data set in this format is provided with **agouti**.
 The `madagascar_malaria` data has low resolution response variables of cases and case rate of malaria in different districts of Madagascar:
 
+NOTE: the low-resolution response variable/s is/are repeated for all rows with the same ID.
+
 ```{r}
 data(madagascar_malaria)
 knitr::kable(head(madagascar_malaria), digits=2)
@@ -109,8 +111,6 @@ knitr::kable(head(disag_data), digits=2)
 In this example, the data was already in the correct format so the returned object 
 `disag_data` is in the same format as `madagascar_malaria` but the class of
 the resulting dataframe has changed.
-
-NOTE: the low-resolution response variable is repeated for all rows with the same ID.
 
 Now we have an object of class `as_disag` we can summarise, plot and run
 a simple analysis.
@@ -240,10 +240,10 @@ This summary shows the number of rows in our dataset which is at the high resolu
 
 The table summarises all variables that are not aggregated, calculated the median within each group and then presents the median of these medians.
 
-In this dataset, because we created 10 lags for every outcome value the first 10 outcomes contain NAs for some lags. As a result, the lagged growth variable summary has NAs. To consider the summary without the rows containing NA, add the argument *removeNA = TRUE*.
+In this dataset, because we created 10 lags for every outcome value the first 10 outcomes contain NAs for some lags. As a result, the lagged growth variable summary has NAs. To consider the summary without the rows containing NA, add the argument *na.rm = TRUE*.
 
 ```{r}
-agouti::agouti_summary(disag_ts,high_res="covariate",removeNA=TRUE)
+agouti::agouti_summary(disag_ts,high_res="covariate",na.rm=TRUE)
 ```
 
 #### Visualise
@@ -323,6 +323,7 @@ covariate <- terra::rast("annual_mean_temp_newyork.tif")
 covariate_clip <- raster::crop(covariate, raster::extent(polygons))
 covariate_clip <- raster::mask(covariate_clip, polygons)
 plot(covariate_clip, main="High-resolution covariate")
+
 ```
 
 
@@ -356,9 +357,10 @@ This data set contains a single covariate. The function
 `heat_hist()` plots a histogram grouped by ID on the y axis ordered by
 the median predictor (x) within each group.
 
+
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::heat_hist(disag_sf$annual_mean_temp_newyork, disag_sf$ID)+ ggplot2::ggtitle("Covariate")
+agouti::heat_hist(disag_sf$annual_mean_temp_newyork, disag_sf$ID, breaks=30)+ ggplot2::ggtitle("Covariate")
 ```
 :::
 
