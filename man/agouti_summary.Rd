@@ -4,7 +4,7 @@
 \alias{agouti_summary}
 \title{Summarise a aggregated output dataset.}
 \usage{
-agouti_summary(x, ID = ID, high_res = NA, removeNA = FALSE)
+agouti_summary(x, ID = ID, high_res = NA, na.rm = FALSE)
 }
 \arguments{
 \item{x}{A data frame suitable for use as aggregate output data.}
@@ -14,7 +14,7 @@ agouti_summary(x, ID = ID, high_res = NA, removeNA = FALSE)
 \item{high_res}{A string or vector of strings specifying a column or columns of high resolution variables to summarise.
 default is NULL in which case the function will summarise all variables with more unique values than ID}
 
-\item{removeNA}{default is false, is removeNA is not equal to false, NA's will be dropped}
+\item{na.rm}{default is false, if na.rm is not equal to false, NA's will be dropped}
 }
 \description{
 Summarise a aggregated output dataset.
