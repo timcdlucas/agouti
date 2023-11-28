@@ -1,5 +1,5 @@
 ---
-title: "An introduction to the AGOUti package"
+title: "An introduction to the agouti package"
 output:
   rmarkdown::html_vignette:
      toc: true
@@ -23,10 +23,10 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-This vignette describes the use of the **AGOUti** R package, a generic R
+This vignette describes the use of the **agouti** R package, a generic R
 package for exploratory analyses of multi-resolution data.
 
-Install **AGOUti** using:
+Install **agouti** using:
 ```r
 #install.packages('agouti') # probs use github
 ```
@@ -36,21 +36,21 @@ Multi-resolution data is also referred to as mixed frequency, mixed data and mis
 
 Examples of multi-resoltion data include an outcome of daily deaths of respiratory disease with covariates recorded hourly or an outcome may be the number of deaths in a country with covariates at 5kmx5km resolution. Another, less intuitive example of multi-resolution data is that of a series of lagged variables. For example, daily growth in stock prices, the main covariate is the lagged growth rate. Instead of treating each lag as separate variables they can be treated as a single variable where one response, stock growth on day X, has Y lags associated (i.e. more than one covariate value for the same response).
 
-Currently, users of multi-resolution data have to seek out separate R packages depending on each use case. For example, with spatial data you could use the `disaggregation` package, for econometric data there is `MIDAS` and for time-series data with lags there is `dlnm`. These packages provide complex statistical models and **AGOUti** does not replace these packages but rather is a more generalised package that can help users with more varied types of multi-resolution data in the preliminary stages of analyses. **AGOUti** provides generic functions for multi-resolution data that help format, summarise, visualise and carry out simple exploratory analyses.
+Currently, users of multi-resolution data have to seek out separate R packages depending on each use case. For example, with spatial data you could use the `disaggregation` package, for econometric data there is `MIDAS` and for time-series data with lags there is `dlnm`. These packages provide complex statistical models and **agouti** does not replace these packages but rather is a more generalised package that can help users with more varied types of multi-resolution data in the preliminary stages of analyses. **agouti** provides generic functions for multi-resolution data that help format, summarise, visualise and carry out simple exploratory analyses.
 
 Data visualisation is a difficult problem with aggregated outputs. 
 Even standard plots like scatter plots do not work because there are many covariate
 values for each response value.
 Simple plots, like using the aggregate output value for all covariate values 
 don't make much sense.
-There are two particular problems that the **AGOUti** package visualizations address.
+There are two particular problems that the **agouti** package visualizations address.
 Firstly, the methods are scalable to hundreds or thousands of aggregate output data points. Secondly, the methods can help to detect the importance of non-linearity. 
 
 ## Key functions and how to use this vignette
 
-The key functions of **AGOUti** are `as_disag`, `agouti_summary`, plotting and `agoutiGLM`. The function `as_disag()` takes multi-resolution data with various structures formats it and makes it of class `as_disag`. The second feature is to summarise, `agouti_summary()` takes an object of class `as_disag` and provides a summary of all high-resolution variables. Visualisation is the third feature. **AGOUti** provides four plotting functions to investigate high-resolution covariates against a low-resolution response. The final feature is to run a simple analysis with `agoutiGLM`.
+The key functions of **agouti** are `as_disag`, `agouti_summary`, plotting and `agoutiGLM`. The function `as_disag()` takes multi-resolution data with various structures formats it and makes it of class `as_disag`. The second feature is to summarise, `agouti_summary()` takes an object of class `as_disag` and provides a summary of all high-resolution variables. Visualisation is the third feature. **agouti** provides four plotting functions to investigate high-resolution covariates against a low-resolution response. The final feature is to run a simple analysis with `agoutiGLM`.
 
-This vignette will demonstrate examples of using the **AGOUti** package with
+This vignette will demonstrate examples of using the **agouti** package with
 multi-resolution data of different formats. We advise readers work through the first example irrespective of the data structure in their own dataset before proceeding to the example most similar to their data.
 
 ## Examples:
@@ -75,7 +75,7 @@ devtools::load_all()
 
 In this example, you think your data is already tidy. You have your high resolution covariate/s, low resolution response and an ID variable linking high and low resolution data in a single dataframe. 
 
-An example, data set in this format is provided with **AGOUti**.
+An example, data set in this format is provided with **agouti**.
 The `madagascar_malaria` data has low resolution response variables of cases and case rate of malaria in different districts of Madagascar:
 
 ```{r}
@@ -139,7 +139,7 @@ agouti::agouti_summary(disag_data, high_res=c("pop","EVI"))
 
 #### Visualise
 
-The **AGOUti** package provides four plotting functions
+The **agouti** package provides four plotting functions
 
 ##### 1) `heat_hist()`
 
