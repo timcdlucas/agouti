@@ -9,20 +9,20 @@
 #' @param ID The column to use as the group ID column. Unquoted value.
 #' @param high_res A string or vector of strings specifying a column or columns of high resolution variables to summarise.
 #' default is NULL in which case the function will summarise all variables with more unique values than ID
-#' @param removeNA default is false, is removeNA is not equal to false, NA's will be dropped
+#' @param na.rm default is false, if na.rm is not equal to false, NA's will be dropped
 #' @export
 #' @examples
 #' data(madagascar_malaria)
 #' agouti_summary(madagascar_malaria)
 #' agouti_summary(madagascar_malaria, high_res=c("pop","EVI"))
 
-agouti_summary <- function(x, ID = ID, high_res=NA, removeNA = FALSE){
+agouti_summary <- function(x, ID = ID, high_res=NA, na.rm = FALSE){
 
   if(!(inherits(x, "as_disag")))
     warning("Using data not of class as_disag, we advise first using the
             function as_disag() to check and format your data")
 
-  if(removeNA!=FALSE){
+  if(na.rm!=FALSE){
     x <- x %>% tidyr::drop_na()
   }
 
