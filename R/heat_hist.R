@@ -20,12 +20,12 @@ heat_hist <- function(x, ID, weights = 1, breaks = 50){
     d <- data.frame(x, ID = ID, weights = weights)
 
     # drop NAs for calculating binwidth these are just NAs because of the lag
-    bins <- diff(range(d$x[!(is.na(d$x))]))
+    totalwidth <- diff(range(d$x[!(is.na(d$x))]))
 
     p1 <-
         ggplot2::ggplot(d, ggplot2::aes(x = .data$x, y = .data$ID, weights = .data$weights)) +
         ggplot2::geom_bin_2d(
-            binwidth = c(bins / breaks, 1)
+            binwidth = c(totalwidth / breaks, 1)
         ) +
         ggplot2::scale_fill_viridis_c() +
         ggplot2::theme(panel.grid.minor.y = ggplot2::element_blank(),
