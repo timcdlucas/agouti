@@ -77,9 +77,9 @@ devtools::load_all()
 In this example, you think your data is already tidy. You have your high resolution covariate/s, low resolution response and an ID variable linking high and low resolution data in a single dataframe. 
 
 An example, data set in this format is provided with **agouti**.
-The `madagascar_malaria` data has low resolution response variables of cases and case rate of malaria in different districts of Madagascar:
+The `madagascar_malaria` data has low resolution response variables of cases and case rate of malaria in different districts of Madagascar identified by the ID variable:
 
-NOTE: the low-resolution response variable/s is/are repeated for all rows with the same ID.
+NOTE: the low-resolution response variable/s is/are repeated for all rows with the same ID. This is purely for practical reasons and the response data within an ID should NOT be summed.
 
 ```{r}
 data(madagascar_malaria)
@@ -100,7 +100,7 @@ This dataset contains the following variables:
 
 #### Format
 
-To check if this is in the correct format and to convert it to the correct format if not, we use the function `as_disag()`.
+To check if this is in the correct format and convert it to the correct format if not, use the function `as_disag()`.
 
 In this example, the data was already in the correct format so the returned object 
 `disag_data` is in the same format as `madagascar_malaria` but the class of
@@ -118,7 +118,7 @@ knitr::kable(head(disag_data), digits=2)
 
 #### Summarise
 
-Using the function `agouti_summary()` we can summarise the
+The function `agouti_summary()` provides a summary of the
 variables that are at a higher resolution than the response. Because the raw data was already in the correct format you can use this raw data in `agouti_summary` however, a warning will be printed to encourage you to first use `as_disag()`.
 
 ```{r}
@@ -159,15 +159,18 @@ gridExtra::grid.arrange(p1,p2,ncol=2)
 
 ##### 2) `group_summary_plot()`
 
-With `heat_hist` we looked at the covariates in isolation but we might want to visualise the covariates against the response. This is not straightforward for multi-resolution data.
-The next three types of plot offer different but complimentary approaches to exploratory analyses of multi-resolution data. Not all plots may be appropriate for a given dataset but we hope these novel plots aid users of multi-resolution data in standard exploratory tasks such as looking at the distribution of data and exploring central tendency as well as outliers.
+`heat_hist` looked at the covariates in isolation but we might want to visualize the covariates against the response. This is not straightforward for multi-resolution data.
 
-`group_summary_plot()` summarises the covariates within a group (ID) by quantile and then plots these quantiles against the response data with a trend line. Another way of explaining this, is that within each facet each group (ID) is displayed by a single point. In the 0.05quant facet, the points represent the 5th quantile of the covariate data within each group (ID) 
+The next three types of plot offer different but complimentary approaches to exploratory analyses of multi-resolution data. Not all plots may be appropriate for a given data set but we hope these novel plots aid users of multi-resolution data in exploratory tasks such as looking at the distribution of data and exploring central tendency as well as outliers.
+
+`group_summary_plot()` summarises the covariates within a group (ID) by quantile and then plots these quantiles against the response data with a trend line. Another way of explaining this, is that within each facet each group (ID) is displayed by a single point. In the 0.05quant facet, the points represent the 5th quantile of the covariate values within each group (ID) 
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-p1 <- agouti::group_summary_plot(case_rate ~ Elevation, data = disag_data, ID = ID, weights = pop)+ ggplot2::ggtitle("Elevation")
-p2 <- agouti::group_summary_plot(case_rate ~ LSTmean, data = disag_data, ID = ID, weights = pop)+ ggplot2::ggtitle("LSTmean")
+p1 <- agouti::group_summary_plot(case_rate ~ Elevation, data = disag_data, ID = ID, weights = pop)+
+  ggplot2::ggtitle("Elevation")
+p2 <- agouti::group_summary_plot(case_rate ~ LSTmean, data = disag_data, ID = ID, weights = pop)+
+  ggplot2::ggtitle("LSTmean")
 gridExtra::grid.arrange(p1,p2,ncol=2)
 ```
 :::
@@ -178,14 +181,17 @@ In this data set, these plots show an association between each covariate and the
 
 ##### 3) `thresh_sm()`
 
-An alternative way of visualizing the covariates and response is via small multiple with the function `thresh_sm()`. Small multiples refers to a series of graphs that "use the same basic graphic to display different slices of a data set" (ref).
+An alternative way of visualizing the covariates and response is via small multiples with the function `thresh_sm()`. Small multiples refers to a series of graphs that "use the same basic graphic to display different slices of a data set" (ref).
+
 The plot is created by calculating, within each
 group (ID), the proportion of observations that are above a threshold value. A
 scatter plot with a linear model is then plotted of the relationship between
 this proportion and the aggregated output. The threshold is varied and
-small multiples of the different values are plotted. The number of
+small multiples of the different values are plotted.
+
+The number of
 multiples can be selected by the argument *small_mult*, the default is
-six but we advise trying multiple values for this argument.
+six but we advise trying multiple values for this argument as the most appropriate value will vary with different data
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
@@ -199,13 +205,17 @@ agouti::thresh_sm(case_rate ~ LSTmean, data = disag_data, ID = ID, weights = pop
 ```
 :::
 
-Irrespective of the number of small multiples used, these figures show that overall there appears to be a positive relationship between malaria case rate and LSTmean. The first facet with a threshold value of -1.9, shows that within all groups (ID) over 75% of the observations have a value larger than this threshold. This is not surprising as Madagascar is a relatively warm country across all districts (groups/ID) with cooler average temperatures recorded in a relatively narrow mountainous area so even within a district with a mountainous area overall the mean Land surface temperature for that region (ID/group) is greater than -1.9.
+Irrespective of the number of small multiples used, these figures show that overall there appears to be a positive relationship between malaria case rate and LSTmean.
+
+The first facet with a threshold value of -1.9, shows that within all groups (ID) over 75% of the observations have a value larger than this threshold. This is not surprising as Madagascar is a relatively warm country across all districts (groups/ID) with cooler average temperatures recorded in a relatively narrow mountainous area so even within a district with a mountainous area overall the mean Land surface temperature for that region (ID/group) is greater than -1.9.
 
 ##### 4) `link_plot()`
 
 The final plotting function available is `link_plot()`. This is a
 scatter plot with data from the aggregate unit "linked" by a line and
-colour coded to match. As discussed in the introduction scatterplots are not necessarily the best way to plot multi-resolution data and this plot will not be appropriate for all data sets. This plot could elucidate whether there is a larger range of covariate values for those with a higher or lower response value but with lots of data and lots of aggregate units this plot could also very quickly become too clutered to interpret anything.
+colour coded to match. As discussed in the introduction scatter plots are not necessarily the best way to plot multi-resolution data and this plot will not be appropriate for all data sets.
+
+Link plot could help to elucidate whether there is a larger range of covariate values for those with a higher or lower response value but with lots of data and lots of aggregate units this plot could also very quickly become too cluttered to interpret.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
@@ -217,15 +227,15 @@ gridExtra::grid.arrange(p1,p2,ncol=2)
 
 #### Model
 
-As preliminary analyses a simple glm can be fitted using `agoutiGLM`.
+As preliminary analyses, a simple glm can be fitted using `agoutiGLM`.
 
 ```{r}
-# agouti::agoutiGLM(case_rate ~ LSTmean, data = disag_data, ID = disag_data$ID, weights = disag_data$pop,inner_link = 'identity', outer_link = 'identity', family = 'gaussian')
+# agouti::agoutiGLM(case_rate ~ LSTmean, data = disag_data, ID = disag_data$ID,weights = disag_data$pop,inner_link = 'identity', outer_link = 'identity', family = 'gaussian')
 ```
 
 ### Example 2: Timeseries data with a lagged covariate
 
-In this example, your data is a timeseries of class *ts*. An example is
+In this example, your data is a timeseries of class *ts*. An example included with the agouti package, is
 of daily stock growth
 
 ```{r}
@@ -234,7 +244,7 @@ knitr::kable(head(stock_vector), digits=6)
 class(stock_vector)
 ```
 
-This dataset contains a single variable of class *ts*, representing daily stock growth. Daily stock growth is a function of the previous days stock growth as well as the day before that. So we can create a lagged growth variable that represents our predictor. Where, each lag considered represents a different value for the predictor all corresponding to the same outcome value.
+This data set contains a single variable of class *ts*, representing daily stock growth. Daily stock growth is a function of the previous days stock growth as well as the day before that. So we can create a lagged growth variable that represents our predictor. Where, each lag considered represents a different value for the predictor all corresponding to the same outcome value.
 
 #### Format
 This dataset can be transformed to the required format using the `as_disag()` function and specifying the number of lags to be considered as follows:
@@ -316,6 +326,8 @@ The final plotting function available is `link_plot()`. This is a
 scatter plot with data from the aggregate unit "linked" by a line and
 colour coded to match.
 
+In this example, link plot does not really add anything to our exploratory analyses of this data.
+
 ::: {style="margin-bottom:50px;"}
 ```{r}
 agouti::link_plot(outcome ~ covariate, data = disag_ts, ID = ID, weights = 1)
@@ -336,7 +348,8 @@ Here we have two datasets 1) A shapefile (using data from the package `SpatialEp
 # get polygon data from SpatialEpi pacakge
 polygons <- sf::st_as_sf(NYleukemia$spatial.polygon)
 df <- cbind(polygons, NYleukemia$data)
-ggplot2::ggplot() + ggplot2::geom_sf(data = df, aes(fill = cases / population)) + ggplot2::scale_fill_viridis_c(lim = c(0, 0.003))+ggtitle("Low-resolution polygons")
+ggplot2::ggplot() + ggplot2::geom_sf(data = df, aes(fill = cases / population)) +
+  ggplot2::scale_fill_viridis_c(lim = c(0, 0.003))+ggtitle("Low-resolution polygons")
 # get raster data (using annual mean temp from bioclim cropped to the extent of the polygons)
 covariate <- terra::rast("annual_mean_temp_newyork.tif")
 covariate_clip <- raster::crop(covariate, raster::extent(polygons))
@@ -379,7 +392,8 @@ the median predictor (x) within each group.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::heat_hist(disag_sf$annual_mean_temp_newyork, disag_sf$ID, breaks=30)+ ggplot2::ggtitle("Covariate")
+agouti::heat_hist(disag_sf$annual_mean_temp_newyork, disag_sf$ID, breaks=30)+
+  ggplot2::ggtitle("Covariate")
 ```
 :::
 
@@ -417,6 +431,7 @@ agouti::thresh_sm(cases ~ annual_mean_temp_newyork, data = disag_sf, ID = ID)
 The final plotting function available is `link_plot()`. This is a
 scatter plot with data from the aggregate unit "linked" by a line and
 colour coded to match.
+
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
