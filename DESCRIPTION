@@ -27,7 +27,8 @@ Imports:
     terra,
     sf,
     SpatialEpi,
-    raster
+    raster,
+    gridExtra
 Suggests: 
     rmarkdown,
     knitr,
