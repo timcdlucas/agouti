@@ -99,11 +99,18 @@ as_disag.data.frame <- function (data,data2=NULL,response_var,...){
 #'}
 as_disag.sf <- function (data, rstack, response_var="response",...){
 
-  ## first need some checks on each of the objects
+  ## Checks on data arg
+  if(!inherits(data, "sf"))
+    stop("Data is not of class sf")
+    if(inherits(data, "SpatialPolygonsDataFrame")) print("Use 'st_as_sf' to convert spdf to sf")
   if(!("ID" %in% names(data)))
     stop("ID varible not found in data, please check")
   if(!(response_var %in% names(data)))
-    stop("ID varible not found in response data, please check")
+    stop("response varible not found in data, please check")
+
+  ## Checks on rstack arg
+  if(!inherits(rstack, "SpatRaster"))
+    stop("Data is not of class SpatRaster: use terra package to convert data")
 
   df_summ <- prepare_data(polygon_shapefile =data, covariate_rasters = rstack, id_var="ID",
                         response_var=response_var,na.action=TRUE)
