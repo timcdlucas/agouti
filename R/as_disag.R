@@ -293,7 +293,7 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
   }
 
   # Create lags - this is in wide format
-  data_lags <- data_ts %>% calculate_lags("outcome", 1:lags)
+  data_lags <- data_ts %>% calculate_lags("response", 1:lags)
   #data_lags <- cbind(data_lags, data_ts)
   # Grab the names of the lag columns so we can go from wide to long
   a <- names(data_lags)[grepl("lag",colnames(data_lags))]
