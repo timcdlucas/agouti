@@ -274,7 +274,7 @@ as_disag.ts <- function(data,lags=10, ID="add",...){
      stop("Data object is not of class time-series")
 
   data_ts <- as.data.frame(as.numeric(data))
-  names(data_ts)[1] <- "outcome"
+  names(data_ts)[1] <- "response"
 
   ## Adding and checking the ID col
   if(any(ID == "add")){
