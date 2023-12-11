@@ -179,6 +179,51 @@ These are novel plots and so we are still working on how to interpret these. Bel
 
 In this data set, these plots show an association between each covariate and the response albeit in different directions. Similar trends in the data across all quantiles are seen for Elevation and for LST mean similar trends in the data are seen across the 5th, 25th and 50th quantiles with a slight change in the trend after that possibly suggesting that at the upper extremes of temperature there is a different association between mean land surface temperature and malaria case rate.
 
+Now look at these plotted with a linear model instead of just using loess.
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+group_summary_plot2 <- function(formula, data, ID = ID, weights = weights){
+
+    x <- as.character(formula[[3]])
+    y <- as.character(formula[[2]])
+
+
+    # If default weights value (weights) is used, and weights not in data,
+    #   Add a column of 1s
+    if(!('weights' %in% names(data))){
+        data$weights <- 1
+    }
+
+    ## for handling NAs
+    data <- data %>% tidyr::drop_na()
+
+    p1 <-
+    data %>%
+        dplyr::group_by(ID) %>%
+        dplyr::summarise(
+            `0.05quant` = quantile(.data[[x]], 0.05),
+            `0.25quant` = quantile(.data[[x]], 0.25),
+            `0.5quant` = median(.data[[x]]),
+            `0.75quant` = quantile(.data[[x]], 0.75),
+            `0.95quant` = quantile(.data[[x]], 0.95),
+            response = mean(.data[[y]])) %>%
+        dplyr::ungroup() %>%
+        dplyr::select(-.data$ID) %>%
+        tidyr::pivot_longer(-.data$response) %>%
+        ggplot2::ggplot(ggplot2::aes(.data$value, .data$response)) +
+            ggplot2::facet_wrap(~ .data$name, scale = 'free') +
+            ggplot2::geom_point() +
+            ggplot2::geom_smooth(method = 'lm', colour = 'blue')
+
+    return(p1)
+}
+p1 <- group_summary_plot2(case_rate ~ Elevation, data = disag_data, ID = ID, weights = pop)+
+  ggplot2::ggtitle("Elevation")
+p2 <- group_summary_plot2(case_rate ~ LSTmean, data = disag_data, ID = ID, weights = pop)+
+  ggplot2::ggtitle("LSTmean")
+gridExtra::grid.arrange(p1,p2,ncol=2)
+```
+
+
 ##### 3) `thresh_sm()`
 
 An alternative way of visualizing the covariates and response is via small multiples with the function `thresh_sm()`. Small multiples refers to a series of graphs that "use the same basic graphic to display different slices of a data set" (ref).
@@ -207,7 +252,51 @@ agouti::thresh_sm(case_rate ~ LSTmean, data = disag_data, ID = ID, weights = pop
 
 Irrespective of the number of small multiples used, these figures show that overall there appears to be a positive relationship between malaria case rate and LSTmean.
 
-The first facet with a threshold value of -1.9, shows that within all groups (ID) over 75% of the observations have a value larger than this threshold. This is not surprising as Madagascar is a relatively warm country across all districts (groups/ID) with cooler average temperatures recorded in a relatively narrow mountainous area so even within a district with a mountainous area overall the mean Land surface temperature for that region (ID/group) is greater than -1.9.
+Now have a look at this plot if we use loess instead of a linear model.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+thresh_sm2 <- function(formula, data, ID = ID, weights = weights,
+                      small_mult = 6,
+                      lower_percentile = 0.05,
+                      upper_percentile = 0.95){
+
+    x <- as.character(formula[[3]])
+    y <- as.character(formula[[2]])
+
+
+    # If default weights value (weights) is used, and weights not in data,
+    #   Add a column of 1s
+    if(!('weights' %in% names(data))){
+        data$weights <- 1
+    }
+
+
+    data2 <- data %>% tidyr::drop_na()
+    if(nrow(data2) != nrow(data))
+      warning("Rows with NA have been removed")
+    data <- data %>% tidyr::drop_na()
+    thresholds_sm <- stats::quantile(data[, x, drop = TRUE],
+                              seq(lower_percentile, upper_percentile, length.out = small_mult))
+
+    p1 <-
+    data %>%
+        dplyr::group_by({{ID}}) %>%
+        dplyr::summarise(prop = sapply(thresholds_sm,
+                                \(t) stats::weighted.mean(.data[[x]] > t, w = {{weights}})),
+                  threshold = round(thresholds_sm, 3),
+                  response = mean(.data[[y]])) %>%
+        ggplot2::ggplot(ggplot2::aes(x = .data$prop, y = .data$response, colour = .data$threshold)) +
+        ggplot2::geom_point() +
+        ggplot2::geom_smooth() +
+        #ggplot2::geom_smooth(method = 'lm', colour = 'black') +
+        ggplot2::facet_wrap(~ .data$threshold)
+
+
+    return(p1)
+}
+thresh_sm2(case_rate ~ LSTmean, data = disag_data, ID = ID, weights = pop, small_mult = 6)
+```
+
 
 ##### 4) `link_plot()`
 
@@ -293,13 +382,54 @@ agouti::heat_hist(disag_ts$covariate, disag_ts$ID)+ ggplot2::ggtitle("Covariate"
 
 To plot the predictor against the response we can use
 `group_summary_plot()`. This summarises the covariate/s by quantile and
-then plots these quantiles against the response data.
+then plots these quantiles against the response data with a trend line.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::group_summary_plot(outcome ~ covariate, data = disag_ts, ID = ID)
+agouti::group_summary_plot(response ~ covariate, data = disag_ts, ID = ID)
 ```
 :::
+
+And now with a linear model instead of trend line. 
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+group_summary_plot2 <- function(formula, data, ID = ID, weights = weights){
+
+    x <- as.character(formula[[3]])
+    y <- as.character(formula[[2]])
+
+
+    # If default weights value (weights) is used, and weights not in data,
+    #   Add a column of 1s
+    if(!('weights' %in% names(data))){
+        data$weights <- 1
+    }
+
+    ## for handling NAs
+    data <- data %>% tidyr::drop_na()
+
+    p1 <-
+    data %>%
+        dplyr::group_by(ID) %>%
+        dplyr::summarise(
+            `0.05quant` = quantile(.data[[x]], 0.05),
+            `0.25quant` = quantile(.data[[x]], 0.25),
+            `0.5quant` = median(.data[[x]]),
+            `0.75quant` = quantile(.data[[x]], 0.75),
+            `0.95quant` = quantile(.data[[x]], 0.95),
+            response = mean(.data[[y]])) %>%
+        dplyr::ungroup() %>%
+        dplyr::select(-.data$ID) %>%
+        tidyr::pivot_longer(-.data$response) %>%
+        ggplot2::ggplot(ggplot2::aes(.data$value, .data$response)) +
+            ggplot2::facet_wrap(~ .data$name, scale = 'free') +
+            ggplot2::geom_point() +
+            ggplot2::geom_smooth(method = 'lm', colour = 'blue')
+
+    return(p1)
+}
+group_summary_plot2(response ~ covariate, data = disag_ts, ID = ID)
+```
 
 ##### 3) `thresh_sm()`
 
@@ -316,9 +446,56 @@ The stock data has some NA values, any rows with NA will be removed for plotting
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::thresh_sm(outcome ~ covariate, data = disag_ts, ID = ID, small_mult=6)
+agouti::thresh_sm(response ~ covariate, data = disag_ts, ID = ID, small_mult=6)
 ```
 :::
+
+And now with a trend line instead of linear model. This fails to run geom_smooth
+for some facets. "Error: Compuation failed in stat_smooth(). Caused by error in 'smooth.construct.cr.smooth.spec()'
+x has insufficent unique values to support 10 knots, reduce k."
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+thresh_sm2 <- function(formula, data, ID = ID, weights = weights,
+                      small_mult = 6,
+                      lower_percentile = 0.05,
+                      upper_percentile = 0.95){
+
+    x <- as.character(formula[[3]])
+    y <- as.character(formula[[2]])
+
+
+    # If default weights value (weights) is used, and weights not in data,
+    #   Add a column of 1s
+    if(!('weights' %in% names(data))){
+        data$weights <- 1
+    }
+
+
+    data2 <- data %>% tidyr::drop_na()
+    if(nrow(data2) != nrow(data))
+      warning("Rows with NA have been removed")
+    data <- data %>% tidyr::drop_na()
+    thresholds_sm <- stats::quantile(data[, x, drop = TRUE],
+                              seq(lower_percentile, upper_percentile, length.out = small_mult))
+
+    p1 <-
+    data %>%
+        dplyr::group_by({{ID}}) %>%
+        dplyr::summarise(prop = sapply(thresholds_sm,
+                                \(t) stats::weighted.mean(.data[[x]] > t, w = {{weights}})),
+                  threshold = round(thresholds_sm, 3),
+                  response = mean(.data[[y]])) %>%
+        ggplot2::ggplot(ggplot2::aes(x = .data$prop, y = .data$response, colour = .data$threshold)) +
+        ggplot2::geom_point() +
+        ggplot2::geom_smooth() +
+        #ggplot2::geom_smooth(method = 'lm', colour = 'black') +
+        ggplot2::facet_wrap(~ .data$threshold)
+
+
+    return(p1)
+}
+thresh_sm2(response ~ covariate, data = disag_ts, ID = ID, small_mult=6)
+```
 
 ##### 4) `link_plot()`
 
@@ -330,7 +507,7 @@ In this example, link plot does not really add anything to our exploratory analy
 
 ::: {style="margin-bottom:50px;"}
 ```{r}
-agouti::link_plot(outcome ~ covariate, data = disag_ts, ID = ID, weights = 1)
+agouti::link_plot(response ~ covariate, data = disag_ts, ID = ID, weights = 1)
 ```
 :::
 
@@ -409,6 +586,47 @@ agouti::group_summary_plot(cases ~ annual_mean_temp_newyork, data = disag_sf, ID
 ```
 :::
 
+And now with a linear model instead of trend line.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+group_summary_plot2 <- function(formula, data, ID = ID, weights = weights){
+
+    x <- as.character(formula[[3]])
+    y <- as.character(formula[[2]])
+
+
+    # If default weights value (weights) is used, and weights not in data,
+    #   Add a column of 1s
+    if(!('weights' %in% names(data))){
+        data$weights <- 1
+    }
+
+    ## for handling NAs
+    data <- data %>% tidyr::drop_na()
+
+    p1 <-
+    data %>%
+        dplyr::group_by(ID) %>%
+        dplyr::summarise(
+            `0.05quant` = quantile(.data[[x]], 0.05),
+            `0.25quant` = quantile(.data[[x]], 0.25),
+            `0.5quant` = median(.data[[x]]),
+            `0.75quant` = quantile(.data[[x]], 0.75),
+            `0.95quant` = quantile(.data[[x]], 0.95),
+            response = mean(.data[[y]])) %>%
+        dplyr::ungroup() %>%
+        dplyr::select(-.data$ID) %>%
+        tidyr::pivot_longer(-.data$response) %>%
+        ggplot2::ggplot(ggplot2::aes(.data$value, .data$response)) +
+            ggplot2::facet_wrap(~ .data$name, scale = 'free') +
+            ggplot2::geom_point() +
+            ggplot2::geom_smooth(method = 'lm', colour = 'blue')
+
+    return(p1)
+}
+group_summary_plot2(cases ~ annual_mean_temp_newyork, data = disag_sf, ID = ID)
+```
+
 ##### 3) `thresh_sm()`
 
 An alternative way of visualising the covariates and response is via the
@@ -425,6 +643,53 @@ six.
 agouti::thresh_sm(cases ~ annual_mean_temp_newyork, data = disag_sf, ID = ID)
 ```
 :::
+
+And now with a trend line instead of linear model. And now with a trend line instead of linear model. This fails to run geom_smooth
+for some facets. "Error: Compuation failed in stat_smooth(). Caused by error in 'smooth.construct.cr.smooth.spec()'
+x has insufficent unique values to support 10 knots, reduce k."
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+thresh_sm2 <- function(formula, data, ID = ID, weights = weights,
+                      small_mult = 6,
+                      lower_percentile = 0.05,
+                      upper_percentile = 0.95){
+
+    x <- as.character(formula[[3]])
+    y <- as.character(formula[[2]])
+
+
+    # If default weights value (weights) is used, and weights not in data,
+    #   Add a column of 1s
+    if(!('weights' %in% names(data))){
+        data$weights <- 1
+    }
+
+
+    data2 <- data %>% tidyr::drop_na()
+    if(nrow(data2) != nrow(data))
+      warning("Rows with NA have been removed")
+    data <- data %>% tidyr::drop_na()
+    thresholds_sm <- stats::quantile(data[, x, drop = TRUE],
+                              seq(lower_percentile, upper_percentile, length.out = small_mult))
+
+    p1 <-
+    data %>%
+        dplyr::group_by({{ID}}) %>%
+        dplyr::summarise(prop = sapply(thresholds_sm,
+                                \(t) stats::weighted.mean(.data[[x]] > t, w = {{weights}})),
+                  threshold = round(thresholds_sm, 3),
+                  response = mean(.data[[y]])) %>%
+        ggplot2::ggplot(ggplot2::aes(x = .data$prop, y = .data$response, colour = .data$threshold)) +
+        ggplot2::geom_point() +
+        ggplot2::geom_smooth() +
+        #ggplot2::geom_smooth(method = 'lm', colour = 'black') +
+        ggplot2::facet_wrap(~ .data$threshold)
+
+
+    return(p1)
+}
+thresh_sm2(cases ~ annual_mean_temp_newyork, data = disag_sf, ID = ID)
+```
 
 ##### 4) `link_plot()`
 
