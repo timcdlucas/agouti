@@ -232,11 +232,11 @@ The plot is created by calculating, within each
 group (ID), the proportion of observations that are above a threshold value. A
 scatter plot with a linear model is then plotted of the relationship between
 this proportion and the aggregated output. The threshold is varied and
-small multiples of the different values are plotted.
+small multiples of the different values are plotted. 
 
 The number of
 multiples can be selected by the argument *small_mult*, the default is
-six but we advise trying multiple values for this argument as the most appropriate value will vary with different data
+six but we advise trying multiple values for this argument as the most appropriate value will vary with different data. The lowest and uppermost threshold are set using the lower_percentile and upper_percentile arguments and default to 5th and 9th percent quantiles. The number of thresholds considered between these two values is determined by the small_mult argument.
 
 ::: {style="margin-bottom:50px;"}
 ```{r}

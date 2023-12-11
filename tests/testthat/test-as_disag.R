@@ -30,7 +30,7 @@ test_that("as_disag returns a dataframe where all rows with the same ID have the
 
   data("stock_vector")
   df <- as_disag(stock_vector) %>% dplyr::group_by(.data$ID)%>%
-    dplyr::mutate(unique_response=dplyr::n_distinct(outcome))
+    dplyr::mutate(unique_response=dplyr::n_distinct(response))
   expect_true(all(df$unique_response==1))
 
 
