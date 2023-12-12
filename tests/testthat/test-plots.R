@@ -49,6 +49,6 @@ test_that('A warning message is printed when data to be plotted has NAs', {
   expect_no_warning(thresh_sm(case_rate ~ LSTmean, data = disag_data, ID = ID, weights = pop))
   data("stock_vector")
   disag_ts <- as_disag(stock_vector)
-  expect_warning(thresh_sm(outcome ~covariate, data = disag_ts, ID = ID), "NA have been removed")
+  expect_warning(thresh_sm(response ~covariate, data = disag_ts, ID = ID), "NA have been removed")
 
 })
