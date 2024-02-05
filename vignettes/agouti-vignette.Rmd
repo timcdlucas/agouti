@@ -28,7 +28,7 @@ package for exploratory analyses of multi-resolution data.
 
 Install **agouti** using:
 ```r
-#install.packages('agouti') # probs use github
+#install.packages('agouti') # update to Tim's github
 ```
 ## What is multi-resolution data and why are standard exploratory analyses difficult
 
@@ -52,6 +52,10 @@ The key functions of **agouti** are `as_disag`, `agouti_summary`, plotting and `
 
 This vignette will demonstrate examples of using the **agouti** package with
 multi-resolution data of different formats. We advise readers work through the first example irrespective of the data structure in their own dataset before proceeding to the example most similar to their data.
+
+NOTE: This package introduces some novel visualization tools for multi-resolution data.
+We believe this is an important avenue of research but admit we have not fully got to grips
+with their interpretations. Please feel free to message us with any thoughts.
 
 ## Examples:
 
@@ -252,7 +256,7 @@ agouti::thresh_sm(case_rate ~ LSTmean, data = disag_data, ID = ID, weights = pop
 
 Irrespective of the number of small multiples used, these figures show that overall there appears to be a positive relationship between malaria case rate and LSTmean.
 
-Now have a look at this plot if we use loess instead of a linear model.
+Now have a look at this plot if we use loess instead of a linear model (The default is a linear model).
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 thresh_sm2 <- function(formula, data, ID = ID, weights = weights,
@@ -316,7 +320,8 @@ gridExtra::grid.arrange(p1,p2,ncol=2)
 
 #### Model
 
-As preliminary analyses, a simple glm can be fitted using `agoutiGLM`.
+As preliminary analyses, a simple glm can be fitted using `agoutiGLM`. Below is the function 
+to fit a glm once this function is ready to be used.
 
 ```{r}
 # agouti::agoutiGLM(case_rate ~ LSTmean, data = disag_data, ID = disag_data$ID,weights = disag_data$pop,inner_link = 'identity', outer_link = 'identity', family = 'gaussian')
