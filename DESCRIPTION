@@ -14,25 +14,32 @@ Description: Disaggregation regression, or learning from aggregate outputs, has
 	structure, and link functions) while leaving the specific models for add
 	on packages.
 Imports:
-    grDevices,
     stats,
-    graphics,
     ggplot2,
     forcats,
     dplyr,
     tidyr,
     magrittr,
     rlang,
-    maxLik
+    maxLik,
+    purrr,
+    tidyselect,
+    terra,
+    sf,
+    SpatialEpi,
+    raster,
+    gridExtra
 Suggests: 
     rmarkdown,
     knitr,
-    testthat
+    testthat,
+    devtools
 License: MIT + file LICENSE
 URL: https://github.com/timcdlucas/agouti
 LazyData: true
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
 Depends: 
     R (>= 2.10)
-VignetteBuilder: knitr
+VignetteBuilder: knitr, devtools
+

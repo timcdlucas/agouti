@@ -5,6 +5,7 @@ agouti
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/timcdlucas/agouti/workflows/R-CMD-check/badge.svg)](https://github.com/timcdlucas/agouti/actions)
+[![R-CMD-check](https://github.com/shk313/agouti/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/shk313/agouti/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 
@@ -13,7 +14,7 @@ AGgregate OUtcomes Ish.
 Aggregate outcomes are response data that are aggregated over various spaces. 
 Other related names are disaggregation regression, and downscaling models.
 
-This package is in the very early stages of development. There's barely anything here.
+This package is still in development. GLM function is not yet ready but all other functions should be ready to use.
 
 A clear-cut example is spatial models where covariates are measures at high resolution while responses (such as disease cases) are aggregated at the country or state level.
 However, we can consider aggregation in other ways. 

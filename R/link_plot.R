@@ -1,9 +1,9 @@
 
 #' A very basic plotting for aggregate data that plots a linked scatter plot.
-#' 
-#' This is a scatter plot which data from the aggregate unit "linked" by 
+#'
+#' This is a scatter plot which data from the aggregate unit "linked" by
 #' a line and colour coded to match.
-#' 
+#'
 #' @export
 #' @inheritParams group_summary_plot
 #' @examples
@@ -12,19 +12,19 @@
 
 # Need to add a default for weights
 link_plot <- function(formula, data, ID = ID, weights = weights){
-    
+
     x <- as.character(formula[[3]])
     y <- as.character(formula[[2]])
-    
-    p <- 
-        data %>% 
-            ggplot2::ggplot(ggplot2::aes(y = .data[[y]], x = .data[[x]], 
-                                colour = as.numeric({{ ID }}), 
+
+    p <-
+        data %>%
+            ggplot2::ggplot(ggplot2::aes(y = .data[[y]], x = .data[[x]],
+                                colour = as.numeric({{ ID }}),
                                 group = factor({{ ID }}), alpha = {{ weights }})) +
                 ggplot2::geom_point() +
-                ggplot2::geom_path() + 
-                ggplot2::scale_colour_viridis_c()
-    
+                ggplot2::geom_path() +
+                ggplot2::scale_colour_viridis_c("ID")
+
     return(p)
 }
 

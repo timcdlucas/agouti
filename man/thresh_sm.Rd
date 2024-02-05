@@ -10,7 +10,7 @@ thresh_sm(
   data,
   ID = ID,
   weights = weights,
-  small_mult = 25,
+  small_mult = 6,
   lower_percentile = 0.05,
   upper_percentile = 0.95
 )
@@ -22,23 +22,22 @@ thresh_sm(
 
 \item{ID}{The column to use as the group ID column. Unquoted value.}
 
-\item{weights}{Which column to use as within group weights such as 
-  population or time.
+\item{weights}{Which column to use as within group weights such as
+population or time.}
 
-data(madagascar_malaria)
-group_summary_plot(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)}
-
-\item{small_mult}{How much small multiples to make.}
+\item{small_mult}{How many small multiples to make.}
 
 \item{lower_percentile}{Lowest percentile to use}
 
-\item{upper_percentile}{Highest percentile to use
-data(madagascar_malaria)
-thresh_sm(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)}
+\item{upper_percentile}{Highest percentile to use}
 }
 \description{
-The plot is created by calculating, within each group, the proportion of 
+The plot is created by calculating, within each group, the proportion of
 observations that are above a threshold. A scatter plot with a linear model
 is plotted of the relationship between this proportion and the aggregated output.
 The threshold is varied and small multiples of the different values are plotted.
+}
+\examples{
+data(madagascar_malaria)
+thresh_sm(case_rate ~ LSTmean, data = madagascar_malaria, ID = ID, weights = pop)
 }
